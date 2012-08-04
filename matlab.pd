@@ -1,4 +1,4 @@
-##-*- Mode: CPerl -*-
+##-*- Mode: Perl -*-
 
 use strict;
 use warnings;
@@ -7,6 +7,8 @@ our $VERSION = '0.001';
 pp_setversion("'$VERSION'");
 
 my $Matio_src = 'matio-1.5.0/src';
+
+my ($MAT_FT_MAT73,$MAT_FT_MAT5,$MAT_FT_MAT4) = (0,1,2);
 
 pp_addpm({At=>'Top'}, <<'EO_TOPMATTER');
 
@@ -39,28 +41,135 @@ EO_TOPMATTER
 
 pp_addpm({At => 'Middle'}, <<'EO_MIDDLE');
 
-=head2
+my @Format_list = (0,1,2);
+my ($MAT_FT_MAT73,$MAT_FT_MAT5,$MAT_FT_MAT4) = @Format_list;
 
-This is a function
+sub new {
+    my $class = shift;
 
-=cut
+    my $obj = { 
+        filename => undef, 
+        format => $MAT_FT_MAT73,
+        mode => undef,
+        handle => undef,
+        header => undef
+    };
+    my $filename = shift;
+    $obj->{filename} = $filename if $filename;
+
+    my $mode = shift;
+
+    if ( defined $mode ) {
+      if ($mode eq 'r' or $mode eq '<') {
+        $obj->{mode} = 'r';
+      }
+      elsif ($mode eq 'w' or $mode eq '>') {
+        $obj->{mode} = 'w';
+      }
+      elsif ($mode eq 'rw' or $mode eq '<>') {
+        $obj->{mode} = 'rw';
+      }
+    }
+    elsif (defined $filename) {
+      barf("PDL::IO::Matlab::new filename given, but no access mode.");
+    }
+    my $format = shift;
+    if (defined $format) {
+      barf("PDL::IO::Matlab::new unknown file format")
+        unless grep(/$format/,@Format_list);
+      $obj->{format} = $format;
+    }
+    bless $obj, $class;
+    $obj->open() if defined $filename;
+    $obj;
+}
+
+sub DESTROY {
+    my $self = shift;
+    $self->close;
+}
 
 sub open {
-  my ($filename) = @_;
-  my $res = _mat_open($filename);
-  barf "PDL::IO::Matlab::open Can't open '$filename' for reading" unless $res;
-  $res;
+    my $self = shift;
+    my $mode = $self->get_mode();
+    my $filename = $self->get_filename();
+    my $handle;
+    if ( $mode eq 'r' ) {
+        $handle = _mat_open_read($filename);
+    }
+    elsif ( $mode eq 'w' ) {
+        $handle = _mat_create_ver(
+            $filename, $self->get_header(),$self->get_format);
+    }
+    elsif ( $mode eq 'rw' ) {
+        $handle = _mat_open_read_write($filename);
+    }
+    else {
+        barf "PDL::IO::Matlab::open unknown mode $mode");
+    }
+    barf "PDL::IO::Matlab::open Can't open '$filename' in mode $mode" unless $handle;
+    $self->set_handle($handle);
+    $self;
 }
-
-*matlab_open = \&PDL::IO::Matlab::open;
 
 sub close {
-  my ($handle) = @_;
-  _mat_close($handle);
-  1;
+    my $self = shift;
+   _mat_close($self->get_handle() );
+   $self;
 }
 
-*matlab_close = \&PDL::IO::Matlab::close;
+sub get_handle {
+    my $self = shift;
+    barf 'PDL::IO::Matlab::get_handle handle not defined.' unless
+          defined $self->{handle};
+    $self->{handle};
+}
+
+sub set_handle {
+    my $self = shift; 
+    $self->{handle} = shift;
+}
+
+sub get_mode {
+    my $self = shift;
+    barf 'PDL::IO::Matlab::get_mode mode not defined.' unless
+          defined $self->{mode};
+    $self->{mode};
+}
+
+sub set_mode {
+    my $self = shift; 
+    $self->{mode} = shift;
+}
+
+sub get_filename {
+    my $self = shift;
+    barf 'PDL::IO::Matlab::get_filename mode not defined.' unless
+          defined $self->{filename};
+    $self->{filename};
+}
+
+sub get_format {
+    my $self = shift;
+    barf 'PDL::IO::Matlab::get_format format not defined.' unless
+          defined $self->{format};
+    $self->{format};
+}
+
+sub set_format {
+    my $self = shift; 
+    $self->{format} = shift;
+}
+
+sub get_header {
+    my $self = shift;
+    $self->{header};
+}
+
+sub set_header {
+    my $self = shift; 
+    $self->{header} = shift;
+}
 
 
 EO_MIDDLE
@@ -71,7 +180,7 @@ pp_addhdr( qq{
 #include "$Matio_src/matio.h"
 });
 
-pp_add_exported qw( matlab_open );
+pp_add_exported qw();
 
 # The line MODULE = ... is also added by PP, so this
 # is redundant
@@ -81,21 +190,67 @@ pp_addxs ( '', '
 MODULE = PDL::IO::Matlab PACKAGE = PDL::IO::Matlab
 
 mat_t *
-_mat_open( filename )
+_mat_open_read( filename )
  char * filename
  CODE:
  RETVAL = Mat_Open(filename,MAT_ACC_RDONLY);
  OUTPUT:
  RETVAL
 
-void
+mat_t *
+_mat_open_read_write( filename )
+ char * filename
+ CODE:
+ RETVAL = Mat_Open(filename,MAT_ACC_RDWR);
+ OUTPUT:
+ RETVAL
+
+int
 _mat_close( handle )
   mat_t * handle
   CODE:
-  Mat_Close(handle);
-
+  /* always returns 0 */
+  RETVAL = Mat_Close(handle);
+  OUTPUT:
+  RETVAL
 
 ');
+
+
+pp_addxs ( '', "
+
+mat_t *
+_mat_create_ver( matname, hdr_str, mat_file_ver_in)
+ char * matname
+ char * hdr_str
+ int  mat_file_ver_in
+ CODE:
+ enum mat_ft mat_file_ver;
+ switch (mat_file_ver_in)
+    {
+     case $MAT_FT_MAT73:
+              {
+                mat_file_ver = MAT_FT_MAT73;
+                break;
+              }
+     case $MAT_FT_MAT5:
+              {
+                mat_file_ver = MAT_FT_MAT5;
+                break;
+              }
+     case $MAT_FT_MAT4:
+              {
+                mat_file_ver = MAT_FT_MAT4;
+                break;
+              }
+     default:
+          barf(\"PDL::IO::Matlab::open unknown file format.\");
+    }
+ RETVAL = Mat_CreateVer(matname, hdr_str, mat_file_ver);
+ OUTPUT:
+ RETVAL
+
+");
 
 pp_done();
 
