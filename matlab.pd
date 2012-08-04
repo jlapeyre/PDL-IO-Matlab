@@ -1,0 +1,103 @@
+##-*- Mode: CPerl -*-
+
+use strict;
+use warnings;
+
+our $VERSION = '0.001';
+pp_setversion("'$VERSION'");
+
+my $Matio_src = 'matio-1.5.0/src';
+
+pp_addpm({At=>'Top'}, <<'EO_TOPMATTER');
+
+=head1 NAME
+
+PDL::IO::Matlab -- Read and write Matlab data files.
+
+=head1 DESCRIPTION
+
+This module provides routines to read and write data files
+in Matlab formats.
+
+=head1 SYNOPSIS
+
+ use PDL::LiteF;
+ use PDL::IO::Matlab;
+
+=cut
+
+$PDL::onlinedoc->scan(__FILE__) if $PDL::onlinedoc;
+
+use strict;
+use warnings;
+
+use PDL::LiteF;
+use PDL::NiceSlice;
+use PDL::Options;
+
+EO_TOPMATTER
+
+pp_addpm({At => 'Middle'}, <<'EO_MIDDLE');
+
+=head2
+
+This is a function
+
+=cut
+
+sub open {
+  my ($filename) = @_;
+  my $res = _mat_open($filename);
+  barf "PDL::IO::Matlab::open Can't open '$filename' for reading" unless $res;
+  $res;
+}
+
+*matlab_open = \&PDL::IO::Matlab::open;
+
+sub close {
+  my ($handle) = @_;
+  _mat_close($handle);
+  1;
+}
+
+*matlab_close = \&PDL::IO::Matlab::close;
+
+
+EO_MIDDLE
+
+pp_addhdr( qq{
+#include <stdio.h>
+#include <stdlib.h>
+#include "$Matio_src/matio.h"
+});
+
+pp_add_exported qw( matlab_open );
+
+# The line MODULE = ... is also added by PP, so this
+# is redundant
+
+pp_addxs ( '', '
+
+MODULE = PDL::IO::Matlab PACKAGE = PDL::IO::Matlab
+
+mat_t *
+_mat_open( filename )
+ char * filename
+ CODE:
+ RETVAL = Mat_Open(filename,MAT_ACC_RDONLY);
+ OUTPUT:
+ RETVAL
+
+void
+_mat_close( handle )
+  mat_t * handle
+  CODE:
+  Mat_Close(handle);
+
+
+');
+
+pp_done();
+
+
+1;
