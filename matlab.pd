@@ -1,5 +1,4 @@
 ##-*- Mode: Perl -*-
-
 use strict;
 use warnings;
 
@@ -9,6 +8,34 @@ pp_setversion("'$VERSION'");
 my $Matio_src = 'matio-1.5.0/src';
 
 my ($MAT_FT_MAT73,$MAT_FT_MAT5,$MAT_FT_MAT4) = (0,1,2);
+
+my %Enums;
+
+sub make_enum_hash {
+    open my $fh, '<', "$Matio_src/matio.h" or die "Can't open matio.h";
+    my $in_enum = 0;
+    my $enum_name;
+    while(<$fh>) {
+        if ($in_enum) {
+            if ( /\}/ ) {
+                $in_enum = 0;
+                next;
+            }
+            next unless /^\s+(\w+)\s*=\s*([x\d]+)/;
+            my ($name,$val) = ($1,$2);
+            $Enums{$enum_name}->{$name} = $val =~/x/ ? hex($val) : $val;
+        }
+        if ( /^enum\s+(\w+)/ ) {
+            $enum_name = $1;
+            $in_enum = 1;
+            $Enums{$enum_name} = {};
+            next;
+        }
+    }
+    close $fh;
+}
+
+make_enum_hash();
 
 pp_addpm({At=>'Top'}, <<'EO_TOPMATTER');
 
@@ -41,23 +68,39 @@ EO_TOPMATTER
 
 pp_addpm({At => 'Middle'}, <<'EO_MIDDLE');
 
-my @Format_list = (0,1,2);
-my ($MAT_FT_MAT73,$MAT_FT_MAT5,$MAT_FT_MAT4) = @Format_list;
+my %Format_list =  (
+    MAT73 => 0,
+    MAT5 => 1,
+    MAT4 => 2
+    );
+
+my %Inv_format_list =  (
+    0 => 'MAT73',
+    1 => 'MAT5',
+    2 => 'MAT4'
+   );
 
 sub new {
     my $class = shift;
+    my ($filename,$mode,$iopts) = @_;
+    my $opt = new PDL::Options(
+        {
+            format => undef,
+            header => undef
+        });
+    $iopts ||= {};
+
+    my $opts = $opt->options($iopts);
 
     my $obj = { 
         filename => undef, 
-        format => $MAT_FT_MAT73,
+        format => $opts->{format} || undef,
         mode => undef,
         handle => undef,
-        header => undef
+        header => $opts->{header} || undef
     };
-    my $filename = shift;
-    $obj->{filename} = $filename if $filename;
 
-    my $mode = shift;
+    $obj->{filename} = $filename if $filename;
 
     if ( defined $mode ) {
       if ($mode eq 'r' or $mode eq '<') {
@@ -69,24 +112,25 @@ sub new {
       elsif ($mode eq 'rw' or $mode eq '<>') {
         $obj->{mode} = 'rw';
       }
+      else {
+        barf "PDL::IO::Matlab::open unknown mode '$mode'";
+      }
     }
     elsif (defined $filename) {
       barf("PDL::IO::Matlab::new filename given, but no access mode.");
     }
-    my $format = shift;
-    if (defined $format) {
-      barf("PDL::IO::Matlab::new unknown file format")
-        unless grep(/$format/,@Format_list);
-      $obj->{format} = $format;
-    }
+    barf("PDL::IO::Matlab::new unknown file format")
+       if defined $opts->{format} and not exists $Format_list{$opts->{format}};
     bless $obj, $class;
     $obj->open() if defined $filename;
     $obj;
 }
 
+# may want to keep track of state at some point,
+# an automatically close.
 sub DESTROY {
     my $self = shift;
-    $self->close;
+#    $self->close;
 }
 
 sub open {
@@ -98,17 +142,22 @@ sub open {
         $handle = _mat_open_read($filename);
     }
     elsif ( $mode eq 'w' ) {
+        $self->get_format || $self->set_format('MAT73');
+        my $header = $self->get_header();
+        my $header_flag = defined $header ?  1 : 0;
+        $header = '' unless defined $header;
         $handle = _mat_create_ver(
-            $filename, $self->get_header(),$self->get_format);
+            $filename, $header, $Format_list{$self->get_format}, $header_flag);
     }
     elsif ( $mode eq 'rw' ) {
         $handle = _mat_open_read_write($filename);
     }
     else {
-        barf "PDL::IO::Matlab::open unknown mode $mode");
+        barf "PDL::IO::Matlab::open unknown mode '$mode'";
     }
     barf "PDL::IO::Matlab::open Can't open '$filename' in mode $mode" unless $handle;
     $self->set_handle($handle);
+    $self->get_format || $self->set_format($self->get_version);
     $self;
 }
 
@@ -144,15 +193,15 @@ sub set_mode {
 
 sub get_filename {
     my $self = shift;
-    barf 'PDL::IO::Matlab::get_filename mode not defined.' unless
+    barf 'PDL::IO::Matlab::get_filename filename not defined.' unless
           defined $self->{filename};
     $self->{filename};
 }
 
 sub get_format {
     my $self = shift;
-    barf 'PDL::IO::Matlab::get_format format not defined.' unless
-          defined $self->{format};
+#    barf 'PDL::IO::Matlab::get_format format not defined.' unless
+#          defined $self->{format};
     $self->{format};
 }
 
@@ -171,6 +220,18 @@ sub set_header {
     $self->{header} = shift;
 }
 
+sub get_version {
+    my $self = shift;
+    my $val = _mat_get_version($self->get_handle);
+#    print "val = $val\n";
+    $Inv_format_list{$val};
+}
+
+sub print_all_var_info {
+    my $self = shift;
+    my $handle = $self->get_handle;
+    _extra_matio_print_all_var_info($handle);
+}
 
 EO_MIDDLE
 
@@ -178,6 +239,7 @@ pp_addhdr( qq{
 #include <stdio.h>
 #include <stdlib.h>
 #include "$Matio_src/matio.h"
+#include "extra_matio.c"
 });
 
 pp_add_exported qw();
@@ -220,12 +282,14 @@ _mat_close( handle )
 pp_addxs ( '', "
 
 mat_t *
-_mat_create_ver( matname, hdr_str, mat_file_ver_in)
+_mat_create_ver( matname, hdr_str, mat_file_ver_in, header_flag)
  char * matname
  char * hdr_str
  int  mat_file_ver_in
+ int  header_flag
  CODE:
  enum mat_ft mat_file_ver;
+ int  retval;
  switch (mat_file_ver_in)
     {
      case $MAT_FT_MAT73:
@@ -240,17 +304,110 @@ _mat_create_ver( matname, hdr_str, mat_file_ver_in)
               }
      case $MAT_FT_MAT4:
               {
-                mat_file_ver = MAT_FT_MAT4;
-                break;
+               barf(\"PDL::IO::Matlab::open Writing in format version MAT4 not supported.\");
               }
      default:
           barf(\"PDL::IO::Matlab::open unknown file format.\");
     }
- RETVAL = Mat_CreateVer(matname, hdr_str, mat_file_ver);
+ if (header_flag)
+     retval = Mat_CreateVer(matname, hdr_str, mat_file_ver);
+ else retval = Mat_CreateVer(matname, NULL, mat_file_ver);
+ RETVAL = retval;
  OUTPUT:
  RETVAL
 
 ");
+
+pp_addxs ( '',  "
+
+int
+_mat_get_version(matfp)
+ mat_t * matfp
+ CODE:
+ enum mat_ft mat_file_ver;
+ int retval;
+ mat_file_ver = Mat_GetVersion(matfp);
+ /* fprintf(stderr, \"in C vers %d\", mat_file_ver); */
+ switch (mat_file_ver)
+    {
+     case MAT_FT_MAT73:
+              {
+                retval= $MAT_FT_MAT73;
+                break;
+              }
+     case MAT_FT_MAT5:
+              {
+                retval= $MAT_FT_MAT5;
+                break;
+              }
+     case MAT_FT_MAT4:
+              {
+                retval= $MAT_FT_MAT4;
+                break;
+              }
+     default:
+          {
+        barf(\"PDL::IO::Matlab::get_version returned unknown version.\");
+         }
+     }
+  RETVAL = retval;
+  OUTPUT:
+  RETVAL
+");
+
+pp_addxs( '', '
+
+void
+_read_data (mat, matvar)
+mat_t * mat
+matvar_t * matvar
+CODE:
+ReadData(mat,matvar);
+
+void
+_mat_print_number(type, data)
+int type
+void * data
+CODE:
+Mat_PrintNumber( (enum matio_types) type, data);
+
+void
+get_library_version()
+  INIT:
+  int major,minor,release;
+
+  PPCODE:
+  Mat_GetLibraryVersion(&major, &minor, &release);
+  XPUSHs(sv_2mortal(newSVnv(major)));
+  XPUSHs(sv_2mortal(newSVnv(minor)));
+  XPUSHs(sv_2mortal(newSVnv(release)));
+
+int
+_mat_rewind(mat)
+mat_t * mat
+CODE:
+int retval;
+retval = Mat_rewind(mat);
+if (retval == -1) barf("PDL::IO::Matlab::rewind Bad filehandle");
+RETVAL = retval;
+OUTPUT:
+RETVAL
+
+
+
+');
+
+
+
+pp_addxs ( '',  '
+
+void
+_extra_matio_print_all_var_info (matfp)
+mat_t * matfp
+CODE:
+extra_matio_print_all_var_info (matfp);
+
+');
 
 pp_done();
 
