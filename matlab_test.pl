@@ -9,7 +9,7 @@ use PDL::IO::Matlab;
 my $f1 = 'Rep_Carlo_90nm.mat';
 my $mat1 = PDL::IO::Matlab->new($f1, '<');
 print "Matlab file format of $f1 is " . $mat1->get_version . "\n";
-$mat1->print_all_var_info;
+$mat1->print_all_var_info( print_data => 1 ) ;
 $mat1->close;
 
 my $f2 = 'testf_mat73.mat';

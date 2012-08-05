@@ -7,7 +7,7 @@ static char *mxclass[16] = {"cell", "struct", "object","char","sparse",
 /* This code copied from docs. It was broken.
    I fixed it a bit.
 */
-void extra_matio_print_all_var_info2 (mat_t * matfp) {
+void extra_matio_print_all_var_info_clumsy(mat_t * matfp) {
   matvar_t *matvar;
   size_t    nbytes;
   int       i;
@@ -42,7 +42,27 @@ void extra_matio_print_all_var_info2 (mat_t * matfp) {
    Calling  Mat_VarPrint(matvar,1) to print data
    seems to be broken. Here we don't want to print data anyway.
 */
-void extra_matio_print_all_var_info (mat_t * matfp, int printdata,
+
+void extra_matio_print_all_var_info (mat_t * matfp, int printdata) {
+  matvar_t *matvar;
+  fflush(stdout);
+  if (printdata)
+    while ( NULL != (matvar = Mat_VarReadNext(matfp)) ) {
+      Mat_VarPrint(matvar,printdata);
+      Mat_VarFree(matvar);
+    }
+  else 
+    while ( NULL != (matvar = Mat_VarReadNextInfo(matfp)) ) {
+      Mat_VarPrint(matvar,printdata);
+      Mat_VarFree(matvar);
+    }
+  fflush(stdout);
+}
+
+
+/* broken */
+/*
+void extra_matio_print_all_var_info_new (mat_t * matfp, int printdata,
                                      int max_cols, int max_rows) {
   matvar_t *matvar;
   fflush(stdout);
@@ -58,4 +78,4 @@ void extra_matio_print_all_var_info (mat_t * matfp, int printdata,
     }
   fflush(stdout);
 }
-
+*/

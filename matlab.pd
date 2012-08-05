@@ -63,6 +63,7 @@ use warnings;
 use PDL::LiteF;
 use PDL::NiceSlice;
 use PDL::Options;
+use Data::Dumper;
 
 EO_TOPMATTER
 
@@ -227,17 +228,21 @@ sub get_version {
     $Inv_format_list{$val};
 }
 
-sub print_all_var_info_old {
-    my $self = shift;
-    my $handle = $self->get_handle;
-    _extra_matio_print_all_var_info($handle);
-}
-
 sub print_all_var_info {
     my $self = shift;
+    my %user_options = @_;
+    my %opts = parse( {print_data => 0} , \%user_options);
+    my $printdata = $opts{print_data} ? 1 : 0;
     my $handle = $self->get_handle;
-    _extra_matio_print_all_var_info($handle,1,10,10);
+    _extra_matio_print_all_var_info($handle,$printdata);
 }
+
+# broken
+#sub print_all_var_info_new {
+#    my $self = shift;
+#    my $handle = $self->get_handle;
+#    _extra_matio_print_all_var_info($handle,1,10,10);
+#}
 
 EO_MIDDLE
 
@@ -245,11 +250,11 @@ pp_addhdr( qq{
 #include <stdio.h>
 #include <stdlib.h>
 #include "$Matio_src/matio.h"
-#include "$Matio_src/matio_private.h"
-#include "$Matio_src/mat5.h"
-#include "$Matio_src/mat4.h"
-#include "$Matio_src/mat73.h"
-#include "mat_var_print.c"
+//#include "$Matio_src/matio_private.h"
+//#include "$Matio_src/mat5.h"
+//#include "$Matio_src/mat4.h"
+//#include "$Matio_src/mat73.h"
+//#include "mat_var_print.c"
 #include "extra_matio.c"
 });
 
@@ -300,7 +305,6 @@ _mat_create_ver( matname, hdr_str, mat_file_ver_in, header_flag)
  int  header_flag
  CODE:
  enum mat_ft mat_file_ver;
- int  retval;
  switch (mat_file_ver_in)
     {
      case $MAT_FT_MAT73:
@@ -321,9 +325,8 @@ _mat_create_ver( matname, hdr_str, mat_file_ver_in, header_flag)
           barf(\"PDL::IO::Matlab::open unknown file format.\");
     }
  if (header_flag)
-     retval = Mat_CreateVer(matname, hdr_str, mat_file_ver);
- else retval = Mat_CreateVer(matname, NULL, mat_file_ver);
- RETVAL = retval;
+     RETVAL = Mat_CreateVer(matname, hdr_str, mat_file_ver);
+ else RETVAL = Mat_CreateVer(matname, (void *) NULL, mat_file_ver);
  OUTPUT:
  RETVAL
 
@@ -412,8 +415,10 @@ RETVAL
 
 pp_addxs ( '',  '
 
+=pod
+
 void
-_extra_matio_print_all_var_info (matfp,printdata,max_cols,max_rows)
+_extra_matio_print_all_var_info_new (matfp,printdata,max_cols,max_rows)
 mat_t * matfp
 int printdata
 int max_cols
@@ -421,11 +426,14 @@ int max_rows
 CODE:
 extra_matio_print_all_var_info (matfp,printdata,max_cols,max_rows);
 
+=cut
+
 void
-_extra_matio_print_all_var_info_old (matfp)
+_extra_matio_print_all_var_info (matfp,printdata)
 mat_t * matfp
+int printdata
 CODE:
-extra_matio_print_all_var_info2 (matfp);
+extra_matio_print_all_var_info(matfp,printdata);
 
 ');
 
