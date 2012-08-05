@@ -227,10 +227,16 @@ sub get_version {
     $Inv_format_list{$val};
 }
 
-sub print_all_var_info {
+sub print_all_var_info_old {
     my $self = shift;
     my $handle = $self->get_handle;
     _extra_matio_print_all_var_info($handle);
+}
+
+sub print_all_var_info {
+    my $self = shift;
+    my $handle = $self->get_handle;
+    _extra_matio_print_all_var_info($handle,1,10,10);
 }
 
 EO_MIDDLE
@@ -239,6 +245,11 @@ pp_addhdr( qq{
 #include <stdio.h>
 #include <stdlib.h>
 #include "$Matio_src/matio.h"
+#include "$Matio_src/matio_private.h"
+#include "$Matio_src/mat5.h"
+#include "$Matio_src/mat4.h"
+#include "$Matio_src/mat73.h"
+#include "mat_var_print.c"
 #include "extra_matio.c"
 });
 
@@ -402,10 +413,19 @@ RETVAL
 pp_addxs ( '',  '
 
 void
-_extra_matio_print_all_var_info (matfp)
+_extra_matio_print_all_var_info (matfp,printdata,max_cols,max_rows)
+mat_t * matfp
+int printdata
+int max_cols
+int max_rows
+CODE:
+extra_matio_print_all_var_info (matfp,printdata,max_cols,max_rows);
+
+void
+_extra_matio_print_all_var_info_old (matfp)
 mat_t * matfp
 CODE:
-extra_matio_print_all_var_info (matfp);
+extra_matio_print_all_var_info2 (matfp);
 
 ');
 
