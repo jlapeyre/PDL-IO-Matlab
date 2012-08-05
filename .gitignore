@@ -3,6 +3,11 @@ blib*
 Makefile.old
 MYMETA.yml
 MYMETA.json
+Makefile
+config.log
+config.status
+.libs
+libtool
 pm_to_blib*
 *.tar.gz
 *.o
@@ -14,5 +19,7 @@ Matlab.pm
 Matlab.c
 Matlab.xs
 Matlab.bs
+*.mat
+
 
 
