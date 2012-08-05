@@ -1,12 +1,10 @@
+/* This code copied from docs. It was broken.
+   I fixed it a bit.
+*/
 static char *mxclass[16] = {"cell", "struct", "object","char","sparse",
                             "double","single","int8", "uint8","int16","uint16",
                             "int32","uint32","int64","uint64","function"
 };
-
-
-/* This code copied from docs. It was broken.
-   I fixed it a bit.
-*/
 void extra_matio_print_all_var_info_clumsy(mat_t * matfp) {
   matvar_t *matvar;
   size_t    nbytes;
@@ -39,8 +37,6 @@ void extra_matio_print_all_var_info_clumsy(mat_t * matfp) {
 
 /* 
    This one is simpler ! 
-   Calling  Mat_VarPrint(matvar,1) to print data
-   seems to be broken. Here we don't want to print data anyway.
 */
 
 void extra_matio_print_all_var_info (mat_t * matfp, int printdata) {

@@ -237,6 +237,20 @@ sub print_all_var_info {
     _extra_matio_print_all_var_info($handle,$printdata);
 }
 
+sub read_next {
+    my $self = shift;
+    _convert_next_matvar_to_pdl($self->get_handle);
+}
+
+sub write_pdls {
+   my $self = shift;
+   my @pdls = @_;
+   foreach (@pdls) {
+       _write_pdl_to_matlab_file($self->get_handle,$_);
+   }
+}
+
+
 # broken
 #sub print_all_var_info_new {
 #    my $self = shift;
@@ -256,6 +270,7 @@ pp_addhdr( qq{
 //#include "$Matio_src/mat73.h"
 //#include "mat_var_print.c"
 #include "extra_matio.c"
+#include "convert_matvar_pdl.c"
 });
 
 pp_add_exported qw();
@@ -434,6 +449,23 @@ mat_t * matfp
 int printdata
 CODE:
 extra_matio_print_all_var_info(matfp,printdata);
+
+pdl *
+_convert_next_matvar_to_pdl(matfp)
+mat_t * matfp
+CODE:
+RETVAL = convert_next_matvar_to_pdl(matfp);
+OUTPUT:
+RETVAL
+
+int
+_write_pdl_to_matlab_file (mat, piddle)
+mat_t * mat
+pdl * piddle
+CODE:
+RETVAL = write_pdl_to_matlab_file (mat, piddle);
+OUTPUT:
+RETVAL
 
 ');
 
