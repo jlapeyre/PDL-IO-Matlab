@@ -32,7 +32,7 @@ my %more_items = (
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     # note the file below that matio Makefile fails to clean.
-    clean               => { FILES => ' PDL-IO-Matlab-* Matlab.* ' . 
+    clean               => { FILES => ' PDL-IO-Matlab-* Matlab.* tst.mat testf.mat ' . 
                                  $matio_top_level . '/test/atconfig' },
 );
 
