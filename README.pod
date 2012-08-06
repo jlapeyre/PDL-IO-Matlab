@@ -11,40 +11,8 @@ Both functional and OO interface are provided.
 Only real, multi-dimensional arrays corresponding to PDL data types are supported.
 Compression is currently only supported when reading.
 
-There are two complicating factors when using matlab files with PDL.
-First, matlab does not support one-dimensional vectors. A 1-d pdl
-must be represented as a C<1 x n> or C<n x 1> matlab variable. Second,
-matlab stores matrices in column-major order, while pdl stores them
-in row-major order. These problems have not been addressed completely
-in this package. Be aware of the following.
-
-=over
-
-=item B<matlab variable names>
-
-You can write variables with the same name (the matlab name, not the pdl identifier,
-or variable name), to a file in MAT5 format. This module is able to read all pdls from this file.
-But, Octave, when reading this file, will overwrite all but the last occurrence
-of the variable with the last occurrence. Currently the names include a number
-that is incremented for each variable. A more flexible way to choose names
-is on the todo list.
-
-Trying to write two pdls with the same matlab variable name in MAT73 format will cause
-an error.
-
-=item B<one-dimensional pdls>
-
-You can write 1-d pdls to a file with this module. This module can then read the
-file. But, Octave will fail to read the file and print an error message. Optionally
-adding or removing a dimension to 1-d pdls when reading and writing is on the todo list.
-
-=item B<column- vs. row major>
-
-Data written by Octave (PDL) will be read by PDL (Octave) with indices transposed.
-On the todo list is an option to physically or logically transpose the data on
-reading and writing.
-
-=back
+See the section L<CAVEATS> for important information on potential problems when using
+this module.
 
 =head1 SYNOPSIS
 
@@ -198,6 +166,57 @@ Print a summary of all data in the file associated
 with C<$mat> (starting from the next unread variable.)
 
 =cut
+=head1 CAVEATS
+
+=head2 complicating factors
+
+There are two complicating factors when using matlab files with PDL.
+First, matlab does not support one-dimensional vectors. A 1-d pdl
+must be represented as a C<1 x n> or C<n x 1> matlab variable. Second,
+matlab stores matrices in column-major order, while pdl stores them
+in row-major order. These problems have not been addressed completely
+in this package. Be aware of the following.
+
+=over
+
+=item B<matlab variable names>
+
+You can write variables with the same name (the matlab name, not the pdl identifier,
+or variable name), to a file in MAT5 format. This module is able to read all pdls from this file.
+But, Octave, when reading this file, will overwrite all but the last occurrence
+of the variable with the last occurrence. Currently, this module appends to the string 'var'
+a number which is incremented on each write. A more flexible way to choose names
+is on the todo list.
+
+Trying to write two pdls with the same matlab variable name in MAT73 format will cause
+an error.
+
+=item B<one-dimensional pdls>
+
+You can write 1-d pdls to a file with this module. This module can then read the
+file. But, Octave will fail to read the file and print an error message. Optionally
+adding or removing a dimension to 1-d pdls when reading and writing is on the todo list.
+
+=item B<column- vs. row major>
+
+Data written by Octave (PDL) will be read by PDL (Octave) with indices transposed.
+On the todo list is an option to physically or logically transpose the data on
+reading and writing.
+
+=back
+
+=head2 other missing features, bugs
+
+When trying to read an unsupported matlab data type from a file, this module will
+throw an error. Supporting other data types or optionally skipping them is on
+the todo list.
+
+Random access of variables in a file is on the todo list. The underlying B<matio>
+library supports this.
+
+This module is currently built with hardcoded data from a PDL installation. It may fail to
+build or function correctly when used on other platforms.
+
 =head1 AUTHOR
 
 John Lapeyre, C<< <jlapeyre at cpan.org> >>
