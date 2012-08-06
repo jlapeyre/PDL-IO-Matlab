@@ -117,7 +117,7 @@ Return first array in C<$filename>
  $x = read_matlab($filename);
 
 Do not automatically convert C<1xn> and C<nx1> arrays
-to an 1-d array.
+to 1-d arrays.
 
  @pdls = read_matlab($filename, { onedr => 0 } );
 

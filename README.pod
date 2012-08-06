@@ -48,7 +48,7 @@ Return first array in C<$filename>
  $x = read_matlab($filename);
 
 Do not automatically convert C<1xn> and C<nx1> arrays
-to an 1-d array.
+to 1-d arrays.
 
  @pdls = read_matlab($filename, { onedr => 0 } );
 
@@ -182,12 +182,12 @@ the piddle's header, then a default value will be used.
 
 =over
 
-=item oned
+=item onedw
 
-If C<oned> is C<1> then a 1-d pdl of length n is written as a
-as an C<nx1> pdl (a C<1xn> matlab variable). If C<oned> is C<2>
+If C<onedw> is C<1> then a 1-d pdl of length n is written as a
+as an C<nx1> pdl (a C<1xn> matlab variable). If C<onedw> is C<2>
 then the output piddle is C<1xn> and the matlab variable C<nx1>.
-If C<oned> is zero (the default), then the 1-d pdl is written
+If C<onedw> is zero (the default), then the 1-d pdl is written
 as a 1-d piddle. In the last case,
 Octave will print an error and fail to read the variable.
 
