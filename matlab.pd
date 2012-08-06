@@ -86,6 +86,13 @@ reading and writing.
 
 =back
 
+When trying to read an unsupported matlab data type from a file, this module will
+throw an error. Supporting other data types or optionally skipping them is on
+the todo list.
+
+Random access of variables in a file is on the todo list. The underlying B<matio>
+library supports this.
+
 =head1 SYNOPSIS
 
  use PDL;
