@@ -150,9 +150,34 @@ Read all remaining pdls from file associated with object C<$mat>.
 
 =head3 Usage
 
+ $x2->hdr->{NAME} = 'variablename';
+
  $mat->write($x1,$x2,...);
 
+ $mat->write($x1,$x2,...,{OPTIONS});
+
 Append pdls to open file associated with C<$mat>.
+
+If a piddle has a matlab name stored in the header
+it will be used as the matlab name written to the file
+with this piddle. The key is in C<$pdl->{namekey}>,
+with default value C<'NAME'>. If the name is not in
+the piddle's header, then a default value will be used.
+
+=head3 Options
+
+=over
+
+=item oned
+
+If C<oned> is C<1> then a 1-d pdl of length n is written as a
+as an C<nx1> pdl (a C<1xn> matlab variable). If C<oned> is C<2>
+then the output piddle is C<1xn> and the matlab variable C<nx1>.
+If C<oned> is zero (the default), then the 1-d pdl is written
+as a 1-d piddle. In the last case,
+Octave will print an error and fail to read the variable.
+
+=back
 
 =cut
 =head2 B<rewind>
@@ -214,9 +239,7 @@ in this package. Be aware of the following.
 You can write variables with the same name (the matlab name, not the pdl identifier,
 or variable name), to a file in MAT5 format. This module is able to read all pdls from this file.
 But, Octave, when reading this file, will overwrite all but the last occurrence
-of the variable with the last occurrence. Currently, this module appends to the string 'var'
-a number which is incremented on each write. A more flexible way to choose names
-is on the todo list.
+of the variable with the last occurrence. See the method L</B<write>>.
 
 Trying to write two pdls with the same matlab variable name in MAT73 format will cause
 an error.
@@ -224,8 +247,8 @@ an error.
 =item B<one-dimensional pdls>
 
 You can write 1-d pdls to a file with this module. This module can then read the
-file. But, Octave will fail to read the file and print an error message. Optionally
-adding or removing a dimension to 1-d pdls when reading and writing is on the todo list.
+file. But, Octave will fail to read the file and print an error message.
+See L</B<write>> for how this is handled.
 
 =item B<column- vs. row major>
 

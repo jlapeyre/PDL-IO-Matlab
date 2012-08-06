@@ -141,14 +141,27 @@ pdl * convert_next_matvar_to_pdl (mat_t * matfp,  matvar_t ** matvar) {
  *  pdl to matvar
  *******************************************************/
 
-matvar_t * pdl_to_matvar (pdl * piddle, char *varname) {
+matvar_t * pdl_to_matvar (pdl * piddle, char *varname, int oned) {
   int ndims = piddle->ndims;
   matvar_t *matvar;
   int i, matvar_class_type, matvar_data_type;
   int opt =  MAT_F_DONT_COPY_DATA;
   size_t * dims;
-  dims = (size_t *)malloc(sizeof(size_t) * ndims);
+  int tmp;
+  dims = (size_t *)malloc(sizeof(size_t) * (ndims+1));
   for(i=0;i<ndims;i++) dims[i] = piddle->dims[i];
+  if (ndims == 1 ) {
+    if ( oned == 1) {
+      ndims = 2;
+      dims[1] = 1;
+    }
+    else if ( oned == 2) {
+      ndims = 2;
+      tmp = dims[0];
+      dims[0] = 1;
+      dims[1] = tmp;
+     }
+  }
   matvar_class_type = pdl_type_to_matvar_class[piddle->datatype];
   matvar_data_type  = pdl_type_to_matvar_type[piddle->datatype];
   matvar = Mat_VarCreate(varname,matvar_class_type, matvar_data_type,
@@ -157,9 +170,9 @@ matvar_t * pdl_to_matvar (pdl * piddle, char *varname) {
   return matvar;
 }
 
-int write_pdl_to_matlab_file (mat_t *mat, pdl *piddle, char *varname) {
+int write_pdl_to_matlab_file (mat_t *mat, pdl *piddle, char *varname, int oned) {
   matvar_t * matvar;
-  matvar = pdl_to_matvar(piddle,varname);
+  matvar = pdl_to_matvar(piddle,varname,oned);
   int retval =  Mat_VarWrite(mat, matvar, MAT_COMPRESSION_NONE);
   Mat_VarFree(matvar);
   return retval;
