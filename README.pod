@@ -11,7 +11,7 @@ Both functional and OO interface are provided.
 Only real, multi-dimensional arrays corresponding to PDL data types are supported.
 Compression is currently only supported when reading.
 
-See the section L<CAVEATS> for important information on potential problems when using
+See the section L</CAVEATS> for important information on potential problems when using
 this module.
 
 =head1 SYNOPSIS
@@ -41,15 +41,16 @@ The functional interface.
 Return all array in C<$filename>
 
  @pdls = read_matlab($filename);
+ @pdls = read_matlab($filename, {OPTIONS});
 
 Return first array in C<$filename>
 
  $x = read_matlab($filename);
 
+
 Reads all data in the file C<$filename>.
-Formats 4, 5, and 7.3 are supported. Returns
-a list in list context or first array read in
-scalar context.
+Formats 4, 5, and 7.3 are supported. Options
+are passed to L</B<new>>.
 
 =cut
 =head2 B<write_matlab>
@@ -83,6 +84,35 @@ must be either C<'MAT5'> or C<'MAT73'>.
 
  # read-write  with rw or <>
  $mat = PDL::IO::Matlab->new('file.dat', 'rw');  
+
+=head3 Options
+
+=over
+
+=item format
+
+Either C<'MAT5'> or C<'MAT73'>.
+
+=item header
+
+A header (a string) to write into the file.
+
+=item namekey
+
+A hash key that will be used to store the matlab name
+for a variable read from a file in the header of a piddle.
+The default value is 'NAME'. Thus, the name can be accessed
+via C<$pdl->hdr->{NAME}>.
+
+=item wvarbase
+
+The base of the default matlab variable name that will be
+written in the matlab file along with each piddle. An
+integer will be appended to the base name. This integer is
+initialized to zero and is incremented after writing each
+variable.
+
+=back
 
 =cut
 =head2 B<close>

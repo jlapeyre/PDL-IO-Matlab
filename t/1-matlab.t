@@ -40,19 +40,28 @@ ok(tapprox($x,sequence(10)), 'read data same as write data');
 
 $mat = PDL::IO::Matlab->new($f, '>', {format => 'MAT5'});
 
-my @types = ( double, float, long, byte, ushort, short );
+my @types = ( double, float, long, byte, short, ushort  );
 map { $mat->write(sequence($_,10)) } @types;
 
 $mat->close;
 
+
 $mat = PDL::IO::Matlab->new($f, '<');
 while(1) {
     my ($err,$x) = $mat->read_next;
-#    last if $err;
-    last unless ref($x); #  this works as well
-    ok($x->type == shift @types, 'trying type');
+    last if $err;
+#    last unless ref($x); #  this works as well
+    my $type = shift @types;
+    ok($x->type == $type, "trying type $type ");
 }
+
+#print "DONE\n";
+#exit(0);
+
 $mat->close;
+
+
+
 
 $mat = PDL::IO::Matlab->new($f, '<');
 my @pdls = $mat->read_all;

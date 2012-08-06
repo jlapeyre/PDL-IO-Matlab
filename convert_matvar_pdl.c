@@ -123,23 +123,18 @@ static pdl* matvar_to_pdl (matvar_t * matvar) {
   if ( 0 > (pdl_data_type = matvar_class_to_pdl_type[matvar->class_type] )) {
     fprintf(stderr, "matvar_to_pdl: matlab data class is '%s'\n",matvar_class_type_desc[matvar->class_type]);
     barf("matvar_to_pdl: No pdl data type corresponding to this class type.");}
-  //  fprintf(stderr,"Making pdl type %d\n",pdl_data_type);
   piddle = my_pdl_wrap(matvar->data, pdl_data_type, dims, ndims,
                        delete_matvar_to_pdl_data, 0);
   matvar->mem_conserve = 1; // prevent matio freeing memory for data
-  Mat_VarFree(matvar);
   free(dims);
   return piddle;
 }
 
-pdl * convert_next_matvar_to_pdl (mat_t * matfp) {
-  matvar_t * matvar;
-  matvar = Mat_VarReadNext(matfp);
-  if (matvar == NULL )
+pdl * convert_next_matvar_to_pdl (mat_t * matfp,  matvar_t ** matvar) {
+  *matvar = Mat_VarReadNext(matfp);
+  if (*matvar == NULL )
     return NULL;
-    //      return PDL->pdlnew();
-    // barf("Can't read another variable from matlabl file");
-  return matvar_to_pdl(matvar);
+  return matvar_to_pdl(*matvar); // calling code must call Mat_VarFree(matvar)
 }
 
 /*******************************************************
