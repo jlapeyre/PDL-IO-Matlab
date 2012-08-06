@@ -24,7 +24,7 @@ my ($x,$y);
 my $f = 'testf.mat';
 my $mat = PDL::IO::Matlab->new($f, '>', {format => 'MAT5'});
 ok( $mat != 0 , 'file opened for write');
-$mat->write_pdls(sequence(10));
+$mat->write(sequence(10));
 $mat->close();
 
 # Read the pdl
@@ -41,7 +41,7 @@ ok(tapprox($x,sequence(10)), 'read data same as write data');
 $mat = PDL::IO::Matlab->new($f, '>', {format => 'MAT5'});
 
 my @types = ( double, float, long, byte, ushort, short );
-map { $mat->write_pdls(sequence($_,10)) } @types;
+map { $mat->write(sequence($_,10)) } @types;
 
 $mat->close;
 

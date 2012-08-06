@@ -48,8 +48,20 @@ This module provides routines to read and write pdls to and from
 data files in Matlab formats. The module uses the matio C library.
 Both functional and OO interface are provided.
 
-Only real, multi-dimensional arrays correpsonding to PDL data types are supported.
+Only real, multi-dimensional arrays corresponding to PDL data types are supported.
 Compression is currently only supported when reading.
+
+There are two complicating factors when using matlab files with PDL.
+First, matlab does not support one-dimensional vectors. A 1-d pdl
+must be represented as a C<1 x n> or C<n x 1> matlab variable. Second,
+matlab stores matrices in column-major order, while pdl stores them
+in row-major order. These problems have not been addressed completely
+in this package. Be aware of the following.
+
+You can write variables with the same name (the matlab name, not the pdl identifier,
+or variable name), to a file. But octave will overwrite all but the last occurrence
+with the last occurrence
+
 
 =head1 SYNOPSIS
 
@@ -138,9 +150,6 @@ sub read_matlab {
 Write pdls C<$x1>, C<$x2>,.... If present, C<$format>
 must be either C<'MAT5'> or C<'MAT73'>.
 
-Currently there is a bug that only allows a single pdl
-to be written in the format C<'MAT73'>.
-
 =cut
 
 sub write_matlab {
@@ -161,7 +170,7 @@ sub write_matlab {
     my $filename = $strings[0];
     my $format = $strings[1] || 'MAT5';
     my $mat = PDL::IO::Matlab->new($filename, '>', { format => $format });
-    $mat->write_pdls(@refs) if @refs;
+    $mat->write(@refs) if @refs;
     $mat->close;
     scalar(@refs);
 }
@@ -206,7 +215,9 @@ sub new {
         format => $opts->{format} || undef,
         mode => undef,
         handle => undef,
-        header => $opts->{header} || undef
+        header => $opts->{header} || undef,
+        wvarname => 'var',
+        wvarnum => 0
     };
 
     $obj->{filename} = $filename if $filename;
@@ -328,23 +339,28 @@ sub read_all {
     @res;
 }
 
-=head2 B<write_pdls>
+=head2 B<write>
 
 =head3 Usage
 
- $mat->write_pdls($x1,$x2,...);
+ $mat->write($x1,$x2,...);
 
 Append pdls to open file associated with C<$mat>.
-NOTE!! There is a bug that prevents writing more
-than one pdl to a file in format 7.3.
 
 =cut
 
-sub write_pdls {
+sub _make_write_var_name {
+    my $self = shift;
+    my $varname = $self->{wvarname} . $self->{wvarnum};
+    $self->{wvarnum}  += 1;
+    $varname;
+}
+
+sub write {
    my $self = shift;
    my @pdls = @_;
    foreach (@pdls) {
-       _write_pdl_to_matlab_file($self->get_handle,$_);
+       _write_pdl_to_matlab_file($self->get_handle,$_, $self->_make_write_var_name);
    }
    return $self;
 }
@@ -714,11 +730,12 @@ if (retval != NULL) PDL->SetSV_PDL(ST(0),retval);
 
 
 int
-_write_pdl_to_matlab_file (mat, piddle)
+_write_pdl_to_matlab_file (mat, piddle, varname)
 mat_t * mat
 pdl * piddle
+char * varname
 CODE:
-RETVAL = write_pdl_to_matlab_file (mat, piddle);
+RETVAL = write_pdl_to_matlab_file (mat, piddle, varname);
 OUTPUT:
 RETVAL
 
@@ -729,3 +746,15 @@ pp_done();
 
 
 1;
+
+#  LocalWords:  setversion Matio src Enums enum fh matio EO
+#  LocalWords:  addpm TOPMATTER Matlab pdls OO multi PDL qw
+#  LocalWords:  matlab pdl dat Inv filename wantarray rw eq
+#  LocalWords:  iopts undef wvarname wvarnum elsif ver cpan
+#  LocalWords:  matvar varname foreach printdata Lapeyre qq
+#  LocalWords:  jlapeyre Hulbert addhdr stdlib addxs RETVAL
+#  LocalWords:  ACC RDONLY RDWR matname hdr str CreateVer
+#  LocalWords:  matfp retval GetVersion fprintf stderr vers
+#  LocalWords:  VarReadDataAll INIT PPCODE XPUSHs sv feof
+#  LocalWords:  GetLibraryVersion newSVnv filehandle fp EOF
+#  LocalWords:  newmortal SetSV
