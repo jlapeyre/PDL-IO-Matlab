@@ -48,8 +48,8 @@ $mat->close;
 $mat = PDL::IO::Matlab->new($f, '<');
 while(1) {
     my ($err,$x) = $mat->read_next;
-    last if $err;
-#    last unless ref($x) or $x;  this works as well
+#    last if $err;
+    last unless ref($x); #  this works as well
     ok($x->type == shift @types, 'trying type');
 }
 $mat->close;

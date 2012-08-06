@@ -7,10 +7,9 @@ pp_setversion("'$VERSION'");
 
 my $Matio_src = 'matio-1.5.0/src';
 
+# This works nicely, but I am not using it for anything
 my ($MAT_FT_MAT73,$MAT_FT_MAT5,$MAT_FT_MAT4) = (0,1,2);
-
 my %Enums;
-
 sub make_enum_hash {
     open my $fh, '<', "$Matio_src/matio.h" or die "Can't open matio.h";
     my $in_enum = 0;
@@ -41,17 +40,31 @@ pp_addpm({At=>'Top'}, <<'EO_TOPMATTER');
 
 =head1 NAME
 
-PDL::IO::Matlab -- Read and write Matlab data files.
+PDL::IO::Matlab -- Read and write Matlab format data files.
 
 =head1 DESCRIPTION
 
-This module provides routines to read and write data files
-in Matlab formats.
+This module provides routines to read and write pdls to and from
+data files in Matlab formats. The module uses the matio C library.
+Both functional and OO interface are provided.
+
+Only real, multi-dimensional arrays correpsonding to PDL data types are supported.
+Compression is not yet supported.
 
 =head1 SYNOPSIS
 
- use PDL::LiteF;
- use PDL::IO::Matlab;
+ use PDL;
+ use PDL::IO::Matlab qw( read_matlab write_matlab );
+
+ # write two pdls in matlab 5 format
+ write_matlab('file.dat', $x, $y);
+
+ # read an array of piddles 
+ # from file in matlab 4, 5, or 7.3 format.
+ my @pdls =  read_matlab('file.dat');
+ 
+ # write pdl in matlab 7.3 format.
+ write_matlab('file.dat', 'MAT73', $x);
 
 =cut
 
@@ -80,6 +93,93 @@ my %Inv_format_list =  (
     1 => 'MAT5',
     2 => 'MAT4'
    );
+
+# non-OO functions
+
+=head1 FUNCTIONS
+
+The functional interface.
+
+=head2 B<read_matlab>
+
+=head3 Usage
+
+C<@pdls = read_matlab($filename);>
+
+Reads all data in the file C<$filename>.
+Formats 4, 5, and 7.3 are supported.
+
+=cut
+
+sub read_matlab {
+    my ($filename) = @_;
+    my $mat = PDL::IO::Matlab->new($filename, '<');
+    my @res = $mat->read_all;
+    $mat->close;
+    @res;
+}
+
+
+=head2 B<write_matlab>
+
+=head3 Usage
+
+ write_matlab($filename,$x1,$x2,...);
+ write_matlab($filename,$format,$x1,$x2,...);
+
+Write pdls C<$x1>, C<$x2>,.... If present, C<$format>
+must be either C<'MAT5'> or C<'MAT73'>.
+
+Currently there is a bug that only allows a single pdl
+to be written in the format C<'MAT73'>.
+
+=cut
+
+sub write_matlab {
+    my @strings;
+    my @refs;
+    while(@_) {
+        my $v = shift;
+        if ( ref($v) ) {
+            push @refs, $v;
+        }
+        else {
+            push @strings, $v;
+        }
+    }
+    barf 'write_matlab: ' . scalar(@strings) . 
+        ' string arguments given. One or two expected.'
+        if @strings < 1 or @strings > 2 ;
+    my $filename = $strings[0];
+    my $format = $strings[1] || 'MAT5';
+    my $mat = PDL::IO::Matlab->new($filename, '>', { format => $format });
+    $mat->write_pdls(@refs) if @refs;
+    $mat->close;
+    scalar(@refs);
+}
+
+=head1 METHODS
+
+=head2 B<new>
+
+=head3 Usage
+
+ # open for writing
+ $mat = PDL::IO::Matlab->new('file.dat', '>', {format => 'MAT5'});
+
+ # default format is MAT5
+ $mat = PDL::IO::Matlab->new('file.dat', '>');
+
+ # may use 'w' or '>'
+ $mat = PDL::IO::Matlab->new('file.dat', 'w');
+
+ # supply header
+ $mat = PDL::IO::Matlab->new('file.dat', '>', { header => 'some text'} );
+
+ # read-write  with rw or <>
+ $mat = PDL::IO::Matlab->new('file.dat', 'rw');  
+
+=cut
 
 sub new {
     my $class = shift;
@@ -162,11 +262,100 @@ sub open {
     $self;
 }
 
+=head2 B<close>
+
+=head3 Usage
+
+$mat->close;
+
+Close matlab file and free memory associated with C<$mat>.
+
+=cut
+
 sub close {
     my $self = shift;
    _mat_close($self->get_handle() );
    $self;
 }
+
+=head2 B<read_next>
+
+=head3 Usage
+
+ my $x = $mat->read_next;
+ print "End of file\n" unless ref($x);
+
+ my ($err,$x) = $mat->read_next;
+ print "End of file\n" if $err;
+
+Read one pdl from file associated with object C<$mat>.
+
+=cut
+
+sub read_next {
+    my $self = shift;
+    my $pdl = _convert_next_matvar_to_pdl($self->get_handle);
+    my $err = ref($pdl) ? 0 : 1;
+    return ($err,$pdl);
+}
+
+=head2 B<read_all>
+
+=head3 Usage
+
+ my @pdls = $mat->read_all;
+
+Read all remaining pdls from file associated with object C<$mat>.
+
+=cut
+
+sub read_all {
+    my $self = shift;
+    my @res;
+    while(1) {
+        my ($err,$pdl) = read_next($self);
+        last if $err;
+        push @res, $pdl;
+    }
+    @res;
+}
+
+=head2 B<write_pdls>
+
+=head3 Usage
+
+ $mat->write_pdls($x1,$x2,...);
+
+Append pdls to open file associated with C<$mat>.
+NOTE!! There is a bug that prevents writing more
+than one pdl to a file in format 7.3.
+
+=cut
+
+sub write_pdls {
+   my $self = shift;
+   my @pdls = @_;
+   foreach (@pdls) {
+       _write_pdl_to_matlab_file($self->get_handle,$_);
+   }
+   return $self;
+}
+
+=head2 B<rewind>
+
+=head3 Usage
+
+ $mat->rewind
+
+Reset pointer to the head of the file.
+
+=cut
+
+sub rewind {
+    my $self = shift;
+    _mat_rewind($self->get_handle);
+}
+
 
 sub get_handle {
     my $self = shift;
@@ -192,12 +381,33 @@ sub set_mode {
     $self->{mode} = shift;
 }
 
+=head2 B<get_filename>
+
+=head3 Usage
+
+ $mat->get_filename
+
+Return name of file associated with C<$mat>.
+
+=cut
+
 sub get_filename {
     my $self = shift;
     barf 'PDL::IO::Matlab::get_filename filename not defined.' unless
           defined $self->{filename};
     $self->{filename};
 }
+
+=head2 B<get_format>
+
+=head3 Usage
+
+ $mat->get_format
+
+Return matlab data file format for file associated with
+C<$mat>. One of C<'MAT4'>, C<'MAT5'>, or C<'MAT73'>.
+
+=cut
 
 sub get_format {
     my $self = shift;
@@ -228,6 +438,20 @@ sub get_version {
     $Inv_format_list{$val};
 }
 
+=head2 B<print_all_var_info>
+
+=head3 Usage
+
+ $mat->print_all_var_info;
+
+ # also print a small amount of data from each variable.
+ $mat->print_all_var_info( {print_data => 1} );
+
+Print a summary of all data in the file associated
+with C<$mat> (starting from the next unread variable.)
+
+=cut
+
 sub print_all_var_info {
     my $self = shift;
     my %user_options = @_;
@@ -237,70 +461,6 @@ sub print_all_var_info {
     _extra_matio_print_all_var_info($handle,$printdata);
 }
 
-sub read_next {
-    my $self = shift;
-    my $pdl = _convert_next_matvar_to_pdl($self->get_handle);
-    my $err = ref($pdl) ? 0 : 1;
-    return ($err,$pdl);
-}
-
-sub read_all {
-    my $self = shift;
-    my @res;
-    while(1) {
-        my ($err,$pdl) = read_next($self);
-        last if $err;
-        push @res, $pdl;
-    }
-    @res;
-}
-
-sub write_pdls {
-   my $self = shift;
-   my @pdls = @_;
-   foreach (@pdls) {
-       _write_pdl_to_matlab_file($self->get_handle,$_);
-   }
-   return $self;
-}
-
-sub rewind {
-    my $self = shift;
-    _mat_rewind($self->get_handle);
-}
-
-# non-OO functions
-
-sub read_matlab {
-    my ($filename) = @_;
-    my $mat = PDL::IO::Matlab->new($filename, '<');
-    my @res = $mat->read_all;
-    $mat->close;
-    @res;
-}
-
-sub write_matlab {
-    my @strings;
-    my @refs;
-    while(@_) {
-        my $v = shift;
-        if ( ref($v) ) {
-            push @refs, $v;
-        }
-        else {
-            push @strings, $v;
-        }
-    }
-    barf 'write_matlab: ' . scalar(@strings) . 
-        ' string arguments given. One or two expected.'
-        if @strings < 1 or @strings > 2 ;
-    my $filename = $strings[0];
-    my $format = $strings[1] || 'MAT5';
-    my $mat = PDL::IO::Matlab->new($filename, '>', { format => $format });
-    $mat->write_pdls(@refs) if @refs;
-    $mat->close;
-    scalar(@refs);
-}
 
 # broken
 #sub print_all_var_info_new {
@@ -309,6 +469,7 @@ sub write_matlab {
 #    _extra_matio_print_all_var_info($handle,1,10,10);
 #}
 
+###########################################################################
 EO_MIDDLE
 
 pp_addhdr( qq{

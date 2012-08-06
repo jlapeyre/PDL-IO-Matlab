@@ -56,3 +56,21 @@ distcleanall: distclean
 
 
 WriteMakefile( %hash );
+
+
+if(exists $ARGV[0] && $ARGV[0] eq 'README.pod')
+{
+  open README, '>README.pod'  or die "Couldn't open README.pod";
+#  print README $POD_header;
+
+  foreach my $mod  ('Matlab.pm') {
+      open MOD, $mod or die "Couldn't open main module";
+      while (<MOD>)
+      {
+          if (/^=/../^=cut/)
+          { print README; }
+      }
+      close(MOD);
+  }
+  close(README);
+}

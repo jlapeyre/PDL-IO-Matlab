@@ -1,5 +1,16 @@
 PDL-IO-Matlab
 
+Read and write matlab files. For matlab file
+format version 7.3, the hdf5 library must be
+present. For compression in matlab file format
+version 5, the zlib library must be present.
+In any case, version 5 compression is not
+yet supported in the interface.
+
+The pdl data types for a particular pdl build
+(linux  amd64) are hardcoded. This should be
+fixed to make this module more portable.
+
 * MATIO SOURCE
 
 The matio source is included.  But several things
@@ -10,10 +21,4 @@ kept; so that configure succeeds.
 
 ./configure/texinfo.tex is removed
 
-to build matio:
-
-cd toplevel
-./configure
-cd src
-make
 

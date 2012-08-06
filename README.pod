@@ -1,0 +1,162 @@
+=head1 NAME
+
+PDL::IO::Matlab -- Read and write Matlab format data files.
+
+=head1 DESCRIPTION
+
+This module provides routines to read and write pdls to and from
+data files in Matlab formats. The module uses the matio C library.
+Both functional and OO interface are provided.
+
+Only real, multi-dimensional arrays correpsonding to PDL data types are supported.
+Compression is not yet supported.
+
+=head1 SYNOPSIS
+
+ use PDL;
+ use PDL::IO::Matlab qw( read_matlab write_matlab );
+
+ # write two pdls in matlab 5 format
+ write_matlab('file.dat', $x, $y);
+
+ # read an array of piddles 
+ # from file in matlab 4, 5, or 7.3 format.
+ my @pdls =  read_matlab('file.dat');
+ 
+ # write pdl in matlab 7.3 format.
+ write_matlab('file.dat', 'MAT73', $x);
+
+=cut
+=head1 FUNCTIONS
+
+The functional interface.
+
+=head2 B<read_matlab>
+
+=head3 Usage
+
+C<@pdls = read_matlab($filename);>
+
+Reads all data in the file C<$filename>.
+Formats 4, 5, and 7.3 are supported.
+
+=cut
+=head2 B<write_matlab>
+
+=head3 Usage
+
+ write_matlab($filename,$x1,$x2,...);
+ write_matlab($filename,$format,$x1,$x2,...);
+
+Write pdls C<$x1>, C<$x2>,.... If present, C<$format>
+must be either C<'MAT5'> or C<'MAT73'>.
+
+Currently there is a bug that only allows a single pdl
+to be written in the format C<'MAT73'>.
+
+=cut
+=head1 METHODS
+
+=head2 B<new>
+
+=head3 Usage
+
+ # open for writing
+ $mat = PDL::IO::Matlab->new('file.dat', '>', {format => 'MAT5'});
+
+ # default format is MAT5
+ $mat = PDL::IO::Matlab->new('file.dat', '>');
+
+ # may use 'w' or '>'
+ $mat = PDL::IO::Matlab->new('file.dat', 'w');
+
+ # supply header
+ $mat = PDL::IO::Matlab->new('file.dat', '>', { header => 'some text'} );
+
+ # read-write  with rw or <>
+ $mat = PDL::IO::Matlab->new('file.dat', 'rw');  
+
+=cut
+=head2 B<close>
+
+=head3 Usage
+
+$mat->close;
+
+Close matlab file and free memory associated with C<$mat>.
+
+=cut
+=head2 B<read_next>
+
+=head3 Usage
+
+ my $x = $mat->read_next;
+ print "End of file\n" unless ref($x);
+
+ my ($err,$x) = $mat->read_next;
+ print "End of file\n" if $err;
+
+Read one pdl from file associated with object C<$mat>.
+
+=cut
+=head2 B<read_all>
+
+=head3 Usage
+
+ my @pdls = $mat->read_all;
+
+Read all remaining pdls from file associated with object C<$mat>.
+
+=cut
+=head2 B<write_pdls>
+
+=head3 Usage
+
+ $mat->write_pdls($x1,$x2,...);
+
+Append pdls to open file associated with C<$mat>.
+NOTE!! There is a bug that prevents writing more
+than one pdl to a file in format 7.3.
+
+=cut
+=head2 B<rewind>
+
+=head3 Usage
+
+ $mat->rewind
+
+Reset pointer to the head of the file.
+
+=cut
+=head2 B<get_filename>
+
+=head3 Usage
+
+ $mat->get_filename
+
+Return name of file associated with C<$mat>.
+
+=cut
+=head2 B<get_format>
+
+=head3 Usage
+
+ $mat->get_format
+
+Return matlab data file format for file associated with
+C<$mat>. One of C<'MAT4'>, C<'MAT5'>, or C<'MAT73'>.
+
+=cut
+=head2 B<print_all_var_info>
+
+=head3 Usage
+
+ $mat->print_all_var_info;
+
+ # also print a small amount of data from each variable.
+ $mat->print_all_var_info( {print_data => 1} );
+
+Print a summary of all data in the file associated
+with C<$mat> (starting from the next unread variable.)
+
+=cut
