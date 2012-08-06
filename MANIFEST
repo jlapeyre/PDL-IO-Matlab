@@ -7,6 +7,11 @@ t/00-load.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
+t/1-matlab.t
+convert_matvar_pdl.c  
+extra_matio.c
+typemap
+memory_leak.pl
 matio-1.5.0/autogen.sh
 matio-1.5.0/Makefile.in
 matio-1.5.0/configure.ac
