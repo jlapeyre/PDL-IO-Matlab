@@ -146,11 +146,17 @@ must be either C<'MAT5'> or C<'MAT73'>.
 
 sub write_matlab {
     my @strings;
+    my @hashes;
     my @refs;
     while(@_) {
         my $v = shift;
-        if ( ref($v) ) {
-            push @refs, $v;
+        if ( ref($v)  ) {
+            if ( ref($v) eq 'HASH' ) {
+                push @hashes, $v;
+            }
+            else {
+                push @refs, $v;
+            }
         }
         else {
             push @strings, $v;
@@ -161,7 +167,9 @@ sub write_matlab {
         if @strings < 1 or @strings > 2 ;
     my $filename = $strings[0];
     my $format = $strings[1] || 'MAT5';
-    my $mat = PDL::IO::Matlab->new($filename, '>', { format => $format });
+    my $opth = { format => $format };
+    foreach (keys %{$hashes[0]}) { $opth->{$_} = $hashes[0]->{$_} }
+    my $mat = PDL::IO::Matlab->new($filename, '>', $opth);
     $mat->write(@refs) if @refs;
     $mat->close;
     scalar(@refs);
@@ -207,7 +215,7 @@ for a variable read from a file in the header of a piddle.
 The default value is 'NAME'. Thus, the name can be accessed
 via C<$pdl->hdr->{NAME}>.
 
-=item wvarbase
+=item varbasew
 
 The base of the default matlab variable name that will be
 written in the matlab file along with each piddle. An
@@ -227,7 +235,9 @@ sub new {
             format => undef,
             header => undef,
             namekey => 'NAME',
-            wvarbase => 'variable',
+            varbasew => 'variable',
+            onedw => 1,
+            onedr => 1
         });
     $iopts ||= {};
 
@@ -242,17 +252,19 @@ sub new {
 
     foreach (keys %exobj) { $obj->{$_} = $exobj{$_} };
 
-    $obj->{filename} = $filename if $filename;
+    bless $obj, $class;
+
+    $obj->set_filename($filename) if $filename;
 
     if ( defined $mode ) {
       if ($mode eq 'r' or $mode eq '<') {
-        $obj->{mode} = 'r';
+        $obj->set_mode('r');
       }
       elsif ($mode eq 'w' or $mode eq '>') {
-        $obj->{mode} = 'w';
+        $obj->set_mode('w');
       }
       elsif ($mode eq 'rw' or $mode eq '<>') {
-        $obj->{mode} = 'rw';
+        $obj->set_mode('rw');
       }
       else {
         barf "PDL::IO::Matlab::open unknown mode '$mode'";
@@ -263,7 +275,6 @@ sub new {
     }
     barf("PDL::IO::Matlab::new unknown file format")
        if defined $obj->{format} and not exists $Format_list{$obj->{format}};
-    bless $obj, $class;
     $obj->open() if defined $filename;
     $obj;
 }
@@ -335,9 +346,10 @@ Read one pdl from file associated with object C<$mat>.
 
 sub read_next {
     my $self = shift;
-    my ($pdl,$str) = _convert_next_matvar_to_pdl($self->get_handle);
+    my ($pdl,$matlab_name) = _convert_next_matvar_to_pdl($self->get_handle,
+        $self->get_onedr);
     my $err = ref($pdl) ? 0 : 1;
-    $pdl->hdr->{$self->{namekey}} = $str if defined $str;
+    $pdl->hdr->{$self->get_namekey} = $matlab_name if defined $matlab_name;
     return ($err,$pdl);
 }
 
@@ -399,8 +411,8 @@ Octave will print an error and fail to read the variable.
 
 sub _make_write_var_name {
     my $self = shift;
-    my $varname = $self->{wvarbase} . $self->{wvarnum};
-    $self->{wvarnum}  += 1;
+    my $varname = $self->get_varbasew . $self->get_wvarnum;
+    $self->set_wvarnum($self->get_wvarnum + 1);
     $varname;
 }
 
@@ -417,11 +429,13 @@ sub write {
            push @pdls, $arg;
        }
    }
-   my %opts = parse( {oned => 0 },  @hashes ? $hashes[0] : {} );
-   my $oned = $opts{oned};
+#   my %opts = parse( {oned => 0 },  @hashes ? $hashes[0] : {} );
+   my $opts = @hashes ? $hashes[0] : {} ;
+   my $oned = exists $opts->{oned} ? $opts->{oned} : $self->get_onedw;
+   $oned = 1 if $oned == 0 and $self->get_format eq 'MAT73'; # else crash
    foreach (@pdls) {
-       my $name = exists $_->hdr->{$self->{namekey}} ?
-           $_->hdr->{$self->{namekey}} : $self->_make_write_var_name;
+       my $name = exists $_->hdr->{$self->get_namekey} ?
+           $_->hdr->{$self->get_namekey} : $self->_make_write_var_name;
        _write_pdl_to_matlab_file($self->get_handle,$_, $name, $oned );
    }
    return $self;
@@ -442,31 +456,6 @@ sub rewind {
     _mat_rewind($self->get_handle);
 }
 
-
-sub get_handle {
-    my $self = shift;
-    barf 'PDL::IO::Matlab::get_handle handle not defined.' unless
-          defined $self->{handle};
-    $self->{handle};
-}
-
-sub set_handle {
-    my $self = shift; 
-    $self->{handle} = shift;
-}
-
-sub get_mode {
-    my $self = shift;
-    barf 'PDL::IO::Matlab::get_mode mode not defined.' unless
-          defined $self->{mode};
-    $self->{mode};
-}
-
-sub set_mode {
-    my $self = shift; 
-    $self->{mode} = shift;
-}
-
 =head2 B<get_filename>
 
 =head3 Usage
@@ -476,13 +465,6 @@ sub set_mode {
 Return name of file associated with C<$mat>.
 
 =cut
-
-sub get_filename {
-    my $self = shift;
-    barf 'PDL::IO::Matlab::get_filename filename not defined.' unless
-          defined $self->{filename};
-    $self->{filename};
-}
 
 =head2 B<get_format>
 
@@ -494,28 +476,6 @@ Return matlab data file format for file associated with
 C<$mat>. One of C<'MAT4'>, C<'MAT5'>, or C<'MAT73'>.
 
 =cut
-
-sub get_format {
-    my $self = shift;
-#    barf 'PDL::IO::Matlab::get_format format not defined.' unless
-#          defined $self->{format};
-    $self->{format};
-}
-
-sub set_format {
-    my $self = shift; 
-    $self->{format} = shift;
-}
-
-sub get_header {
-    my $self = shift;
-    $self->{header};
-}
-
-sub set_header {
-    my $self = shift; 
-    $self->{header} = shift;
-}
 
 sub get_version {
     my $self = shift;
@@ -626,6 +586,36 @@ of this module.
 
 ###########################################################################
 EO_MIDDLE
+
+sub write_accessors {
+ # !e means barf if property is not set.
+    my @funcs = qw(
+        handle!e  mode!e filename!e format header
+        varbasew!e onedw!e onedr!e namekey!e wvarnum!e );
+    my $s = '';
+    my $errs;
+    foreach (@funcs) {
+        $errs = s/!e// ? 
+     "\n       barf 'PDL::IO::Matlab::get_$_: $_ not defined.' unless
+          defined \$self->{$_};" : '';
+         $s .= "\n
+    sub get_$_ {
+        my \$self = shift;$errs
+            \$self->{$_};
+    }
+  
+    sub set_$_ {
+       my \$self = shift;
+       \$self->{$_} = shift;
+    }
+     "
+  }
+  $s;
+}
+
+
+pp_addpm({At => 'Middle'}, write_accessors() );
+
 
 pp_addhdr( qq{
 #include <stdio.h>
@@ -833,12 +823,13 @@ cause segfault.
 =cut
 
 void
-_convert_next_matvar_to_pdl(matfp)
+_convert_next_matvar_to_pdl(matfp,onedr)
 mat_t * matfp
+int onedr
 PPCODE:
 pdl * retpdl;
 matvar_t * matvar;
-retpdl = convert_next_matvar_to_pdl(matfp, &matvar);
+retpdl = convert_next_matvar_to_pdl(matfp, &matvar, onedr);
 SV * s = sv_newmortal();
 SV * p = sv_newmortal();
 if (retpdl != NULL) PDL->SetSV_PDL(p,retpdl);
@@ -895,5 +886,5 @@ pp_done();
 #  LocalWords:  matfp retval GetVersion fprintf stderr vers
 #  LocalWords:  VarReadDataAll INIT PPCODE XPUSHs sv feof
 #  LocalWords:  GetLibraryVersion newSVnv filehandle fp EOF
-#  LocalWords:  newmortal SetSV namekey wvarbase exobj todo
+#  LocalWords:  newmortal SetSV namekey varbasew exobj todo
 #  LocalWords:  hardcoded retpdl setpv VarFree disa

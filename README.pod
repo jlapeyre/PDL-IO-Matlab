@@ -104,7 +104,7 @@ for a variable read from a file in the header of a piddle.
 The default value is 'NAME'. Thus, the name can be accessed
 via C<$pdl->hdr->{NAME}>.
 
-=item wvarbase
+=item varbasew
 
 The base of the default matlab variable name that will be
 written in the matlab file along with each piddle. An
