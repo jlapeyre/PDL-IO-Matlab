@@ -462,6 +462,27 @@ sub print_all_var_info {
 }
 
 
+=head1 AUTHOR
+
+John Lapeyre, C<< <jlapeyre at cpan.org> >>
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2012 John Lapeyre.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See http://dev.perl.org/licenses/ for more information.
+
+The matio library included here is 
+Copyright 2011 Christopher C. Hulbert. All rights reserved.
+See the file matio-1.5/COPYING in the source distribution
+of this module.
+
+=cut
+
 # broken
 #sub print_all_var_info_new {
 #    my $self = shift;
