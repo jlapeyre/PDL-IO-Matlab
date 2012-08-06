@@ -9,7 +9,7 @@ data files in Matlab formats. The module uses the matio C library.
 Both functional and OO interface are provided.
 
 Only real, multi-dimensional arrays correpsonding to PDL data types are supported.
-Compression is not yet supported.
+Compression is currently only supported when reading.
 
 =head1 SYNOPSIS
 

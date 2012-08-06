@@ -104,10 +104,18 @@ The functional interface.
 
 =head3 Usage
 
-C<@pdls = read_matlab($filename);>
+Return all array in C<$filename>
+
+ @pdls = read_matlab($filename);
+
+Return first array in C<$filename>
+
+ $x = read_matlab($filename);
 
 Reads all data in the file C<$filename>.
-Formats 4, 5, and 7.3 are supported.
+Formats 4, 5, and 7.3 are supported. Returns
+a list in list context or first array read in
+scalar context.
 
 =cut
 
@@ -116,7 +124,7 @@ sub read_matlab {
     my $mat = PDL::IO::Matlab->new($filename, '<');
     my @res = $mat->read_all;
     $mat->close;
-    @res;
+    wantarray ? @res : $res[0];
 }
 
 
