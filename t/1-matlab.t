@@ -2,7 +2,7 @@
 
 use strict; use warnings;
 
-use Test::More tests => 15;
+use Test::More tests => 17;
 
 use PDL;
 use PDL::IO::Matlab qw ( read_matlab write_matlab );
@@ -54,14 +54,7 @@ while(1) {
     my $type = shift @types;
     ok($x->type == $type, "trying type $type ");
 }
-
-#print "DONE\n";
-#exit(0);
-
 $mat->close;
-
-
-
 
 $mat = PDL::IO::Matlab->new($f, '<');
 my @pdls = $mat->read_all;
@@ -80,6 +73,14 @@ ok( (tapprox($x,zeroes(10)) and tapprox($y,ones(5))), 'read_matlab write_matlab'
 write_matlab('tst.mat', 'MAT73', zeroes(10));
 ($x) = read_matlab('tst.mat');
 ok( tapprox($x,zeroes(10)), 'read_matlab write_matlab, MAT73');
+
+write_matlab('tst.mat', sequence(5));
+$x = read_matlab('tst.mat', {onedr => 0} );
+ok( tapprox($x->shape, pdl [5, 1]), 'onedr => 0');
+
+write_matlab('tst.mat', sequence(5), {onedw => 2} );
+$x = read_matlab('tst.mat', {onedr => 0} );
+ok( tapprox($x->shape, pdl [1, 5]), 'onedr => 0 , onedw => 2');
 
 done_testing();
 

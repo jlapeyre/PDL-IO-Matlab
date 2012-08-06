@@ -107,7 +107,7 @@ The functional interface.
 
 =head3 Usage
 
-Return all array in C<$filename>
+Return all arrays in C<$filename>
 
  @pdls = read_matlab($filename);
  @pdls = read_matlab($filename, {OPTIONS});
@@ -116,6 +116,10 @@ Return first array in C<$filename>
 
  $x = read_matlab($filename);
 
+Do not automatically convert C<1xn> and C<nx1> arrays
+to an 1-d array.
+
+ @pdls = read_matlab($filename, { onedr => 0 } );
 
 Reads all data in the file C<$filename>.
 Formats 4, 5, and 7.3 are supported. Options
@@ -139,7 +143,17 @@ sub read_matlab {
  write_matlab($filename,$x1,$x2,...);
  write_matlab($filename,$format,$x1,$x2,...);
 
-Write pdls C<$x1>, C<$x2>,.... If present, C<$format>
+Automatically convert C<n> element, 1-d piddles to C<1xn> matlab
+variables.
+
+ write_matlab($filename,$x1,$x2,..., {onedw => 1} );
+
+Automatically convert C<nx1> matlab
+variables.
+
+ write_matlab($filename,$x1,$x2,..., {onedw => 2} );
+
+This method writes pdls C<$x1>, C<$x2>,.... If present, C<$format>
 must be either C<'MAT5'> or C<'MAT73'>.
 
 =cut
@@ -515,8 +529,7 @@ There are two complicating factors when using matlab files with PDL.
 First, matlab does not support one-dimensional vectors. A 1-d pdl
 must be represented as a C<1 x n> or C<n x 1> matlab variable. Second,
 matlab stores matrices in column-major order, while pdl stores them
-in row-major order. These problems have not been addressed completely
-in this package. Be aware of the following.
+in row-major order.
 
 =over
 
