@@ -58,10 +58,33 @@ matlab stores matrices in column-major order, while pdl stores them
 in row-major order. These problems have not been addressed completely
 in this package. Be aware of the following.
 
-You can write variables with the same name (the matlab name, not the pdl identifier,
-or variable name), to a file. But octave will overwrite all but the last occurrence
-with the last occurrence
+=over
 
+=item B<matlab variable names>
+
+You can write variables with the same name (the matlab name, not the pdl identifier,
+or variable name), to a file in MAT5 format. This module is able to read all pdls from this file.
+But, Octave, when reading this file, will overwrite all but the last occurrence
+of the variable with the last occurrence. Currently the names include a number
+that is incremented for each variable. A more flexible way to choose names
+is on the todo list.
+
+Trying to write two pdls with the same matlab variable name in MAT73 format will cause
+an error.
+
+=item B<one-dimensional pdls>
+
+You can write 1-d pdls to a file with this module. This module can then read the
+file. But, Octave will fail to read the file and print an error message. Optionally
+adding or removing a dimension to 1-d pdls when reading and writing is on the todo list.
+
+=item B<column- vs. row major>
+
+Data written by Octave (PDL) will be read by PDL (Octave) with indices transposed.
+On the todo list is an option to physically or logically transpose the data on
+reading and writing.
+
+=back
 
 =head1 SYNOPSIS
 
