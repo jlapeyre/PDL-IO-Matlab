@@ -410,12 +410,12 @@ the piddle's header, then a default value will be used.
 
 =over
 
-=item oned
+=item onedw
 
-If C<oned> is C<1> then a 1-d pdl of length n is written as a
-as an C<nx1> pdl (a C<1xn> matlab variable). If C<oned> is C<2>
+If C<onedw> is C<1> then a 1-d pdl of length n is written as a
+as an C<nx1> pdl (a C<1xn> matlab variable). If C<onedw> is C<2>
 then the output piddle is C<1xn> and the matlab variable C<nx1>.
-If C<oned> is zero (the default), then the 1-d pdl is written
+If C<onedw> is zero (the default), then the 1-d pdl is written
 as a 1-d piddle. In the last case,
 Octave will print an error and fail to read the variable.
 
@@ -443,14 +443,14 @@ sub write {
            push @pdls, $arg;
        }
    }
-#   my %opts = parse( {oned => 0 },  @hashes ? $hashes[0] : {} );
+#   my %opts = parse( {onedw => 0 },  @hashes ? $hashes[0] : {} );
    my $opts = @hashes ? $hashes[0] : {} ;
-   my $oned = exists $opts->{oned} ? $opts->{oned} : $self->get_onedw;
-   $oned = 1 if $oned == 0 and $self->get_format eq 'MAT73'; # else crash
+   my $onedw = exists $opts->{onedw} ? $opts->{onedw} : $self->get_onedw;
+   $onedw = 1 if $onedw == 0 and $self->get_format eq 'MAT73'; # else crash
    foreach (@pdls) {
        my $name = exists $_->hdr->{$self->get_namekey} ?
            $_->hdr->{$self->get_namekey} : $self->_make_write_var_name;
-       _write_pdl_to_matlab_file($self->get_handle,$_, $name, $oned );
+       _write_pdl_to_matlab_file($self->get_handle,$_, $name, $onedw );
    }
    return $self;
 }
