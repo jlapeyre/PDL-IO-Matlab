@@ -8,7 +8,7 @@ This module provides routines to read and write pdls to and from
 data files in Matlab formats. The module uses the matio C library.
 Both functional and OO interface are provided.
 
-Only real, multi-dimensional arrays correpsonding to PDL data types are supported.
+Only real, multi-dimensional arrays corresponding to PDL data types are supported.
 Compression is currently only supported when reading.
 
 There are two complicating factors when using matlab files with PDL.
@@ -16,7 +16,12 @@ First, matlab does not support one-dimensional vectors. A 1-d pdl
 must be represented as a C<1 x n> or C<n x 1> matlab variable. Second,
 matlab stores matrices in column-major order, while pdl stores them
 in row-major order. These problems have not been addressed completely
-in this package.
+in this package. Be aware of the following.
+
+You can write variables with the same name (the matlab name, not the pdl identifier,
+or variable name), to a file. But octave will overwrite all but the last occurrence
+with the last occurrence
+
 
 =head1 SYNOPSIS
 
