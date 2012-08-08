@@ -601,7 +601,7 @@ of this module.
 EO_MIDDLE
 
 sub write_accessors {
- # !e means barf if property is not set.
+ # !e means barf in get_property if property is not set.
     my @funcs = qw(
         handle!e  mode!e filename!e format header
         varbasew!e onedw!e onedr!e namekey!e wvarnum!e );
