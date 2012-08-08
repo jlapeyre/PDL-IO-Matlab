@@ -521,6 +521,58 @@ sub print_all_var_info {
     _extra_matio_print_all_var_info($handle,$printdata);
 }
 
+EO_MIDDLE
+
+sub write_accessors {
+ # !e means barf in get_property if property is not set.
+    my @funcs = qw(
+        handle!e  mode!e filename!e format header
+        varbasew!e onedw!e onedr!e namekey!e wvarnum!e );
+    my $s = '';
+    my @accessors;
+    my $errs;
+    foreach (@funcs) {
+        $errs = s/!e// ? 
+     "\n       barf 'PDL::IO::Matlab::get_$_: $_ not defined.' unless
+          defined \$self->{$_};" : '';
+    my $getter = "get_$_";
+    my $setter = "set_$_";
+    push @accessors, $getter;
+    push @accessors, $setter;
+         $s .= "\n
+    sub $getter {
+        my \$self = shift;$errs
+            \$self->{$_};
+    }
+  
+    sub $setter {
+       my \$self = shift;
+       \$self->{$_} = shift;
+    }
+     "
+  }
+  $s .= "
+
+=head1 ACCESSOR METHODS
+
+The following are additional accessor methods for the matlab file objects
+PDL::IO::Matlab.
+
+"
+. join(' ',@accessors);
+"
+=cut
+";
+ $s;
+}
+
+pp_addpm({At => 'Middle'}, write_accessors() );
+
+
+
+pp_addpm({At => 'Middle'}, <<'EO_MIDDLE_two');
+
+
 =head1 CAVEATS
 
 =head2 complicating factors
@@ -598,36 +650,8 @@ of this module.
 #}
 
 ###########################################################################
-EO_MIDDLE
 
-sub write_accessors {
- # !e means barf in get_property if property is not set.
-    my @funcs = qw(
-        handle!e  mode!e filename!e format header
-        varbasew!e onedw!e onedr!e namekey!e wvarnum!e );
-    my $s = '';
-    my $errs;
-    foreach (@funcs) {
-        $errs = s/!e// ? 
-     "\n       barf 'PDL::IO::Matlab::get_$_: $_ not defined.' unless
-          defined \$self->{$_};" : '';
-         $s .= "\n
-    sub get_$_ {
-        my \$self = shift;$errs
-            \$self->{$_};
-    }
-  
-    sub set_$_ {
-       my \$self = shift;
-       \$self->{$_} = shift;
-    }
-     "
-  }
-  $s;
-}
-
-
-pp_addpm({At => 'Middle'}, write_accessors() );
+EO_MIDDLE_two
 
 
 pp_addhdr( qq{

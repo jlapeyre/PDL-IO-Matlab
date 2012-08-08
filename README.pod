@@ -235,6 +235,15 @@ Print a summary of all data in the file associated
 with C<$mat> (starting from the next unread variable.)
 
 =cut
+=head1 ACCESSOR METHODS
+
+The following are accessor methods for the matlab file objects
+PDL::IO::Matlab.
+
+get_handle set_handle get_mode set_mode get_filename set_filename get_format set_format get_header set_header get_varbasew set_varbasew get_onedw set_onedw get_onedr set_onedr get_namekey set_namekey get_wvarnum set_wvarnum
+
+
+
 =head1 CAVEATS
 
 =head2 complicating factors
