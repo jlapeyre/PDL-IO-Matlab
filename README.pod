@@ -256,7 +256,7 @@ in row-major order.
 
 =over
 
-=item B<matlab variable names>
+=item B<Octave requires distinct matlab variables names>
 
 The user may user this module to write more than one
 variable, each with the same name, (the matlab name, not the
