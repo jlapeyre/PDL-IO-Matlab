@@ -60,6 +60,7 @@ WriteMakefile( %hash );
 
 if(exists $ARGV[0] && $ARGV[0] eq 'README.pod')
 {
+  print STDERR "Writing README.pod\n";
   open README, '>README.pod'  or die "Couldn't open README.pod";
 #  print README $POD_header;
 
