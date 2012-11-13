@@ -578,8 +578,8 @@ pp_addpm({At => 'Middle'}, <<'EO_MIDDLE_two');
 =head2 complicating factors
 
 There are two complicating factors when using matlab files with PDL.
-First, matlab does not support one-dimensional vectors. A 1-d pdl
-must be represented as a C<1 x n> or C<n x 1> matlab variable. Second,
+First, matlab does not support one-dimensional vectors. Thus, a 1-d pdl
+must be represented as either a C<1 x n> of a C<n x 1> matlab variable. Second,
 matlab stores matrices in column-major order, while pdl stores them
 in row-major order.
 
@@ -587,10 +587,13 @@ in row-major order.
 
 =item B<matlab variable names>
 
-You can write variables with the same name (the matlab name, not the pdl identifier,
-or variable name), to a file in MAT5 format. This module is able to read all pdls from this file.
-But, Octave, when reading this file, will overwrite all but the last occurrence
-of the variable with the last occurrence. See the method L</B<write>>.
+The user may user this module to write more than one
+variable, each with the same name, (the matlab name, not the
+pdl identifier, or variable name), to a file in MAT5
+format. This module is then able to read all pdls from this file.
+But, Octave, when reading this file, will overwrite all but
+the last occurrence of the variable with the last
+occurrence. See the method L</B<write>>.
 
 Trying to write two pdls with the same matlab variable name in MAT73 format will cause
 an error.
