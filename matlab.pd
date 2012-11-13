@@ -585,19 +585,6 @@ in row-major order.
 
 =over
 
-=item B<Octave requires distinct matlab variable names>
-
-The user may user this module to write more than one
-variable, each with the same name, (the matlab name, not the
-pdl identifier, or variable name), to a file in MAT5
-format. This module is then able to read all pdls from this file.
-But, Octave, when reading this file, will overwrite all but
-the last occurrence of the variable with the last
-occurrence. See the method L</B<write>>.
-
-Trying to write two pdls with the same matlab variable name in MAT73 format will cause
-an error.
-
 =item B<one-dimensional pdls>
 
 You can write 1-d pdls to a file with this module. This module can then read the
@@ -610,6 +597,19 @@ Data written by Octave (PDL) will be read by PDL (Octave) with indices transpose
 On the todo list is an option to physically or logically transpose the data on
 reading and writing.
 
+=item B<Octave requires distinct matlab variable names>
+
+With this module, you may write more than one
+variable, each with the same name, (the matlab name; not the
+pdl identifier, or variable, name), to a file in MAT5
+format. This module is then able to read all pdls from this file.
+But, Octave, when reading this file, will overwrite all but
+the last occurrence of the variable with the last
+occurrence. See the method L</B<write>>.
+
+Trying to write two pdls with the same matlab variable name in MAT73 format will cause
+an error.
+
 =back
 
 =head2 other missing features, bugs
@@ -621,7 +621,8 @@ the todo list.
 Random access of variables in a file is on the todo list. The underlying B<matio>
 library supports this.
 
-This module is currently built with hardcoded data from a PDL installation. It may fail to
+This module is currently built with some hardcoded data from a PDL installation, that
+may contain platform-specific (linux) features. It may fail to
 build or function correctly when used on other platforms.
 
 =head1 AUTHOR
