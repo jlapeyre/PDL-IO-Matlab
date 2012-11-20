@@ -227,7 +227,7 @@ A header (a string) to write into the file.
 A hash key that will be used to store the matlab name
 for a variable read from a file in the header of a piddle.
 The default value is 'NAME'. Thus, the name can be accessed
-via C<$pdl->hdr->{NAME}>.
+via C<< $pdl->hdr->{NAME} >>.
 
 =item varbasew
 
