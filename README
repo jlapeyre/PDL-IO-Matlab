@@ -20,5 +20,3 @@ In ./documentation and ./test, only the Makefiles are
 kept; so that configure succeeds.
 
 ./configure/texinfo.tex is removed
-
-

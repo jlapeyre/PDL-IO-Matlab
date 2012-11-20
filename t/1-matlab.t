@@ -5,7 +5,7 @@ use strict; use warnings;
 use Test::More tests => 17;
 
 use PDL;
-use PDL::IO::Matlab qw ( read_matlab write_matlab );
+use PDL::IO::Matlab qw ( matlab_read matlab_write );
 
 sub tapprox {
   my($x,$y, $eps) = @_;
@@ -65,21 +65,21 @@ $mat->rewind;
 ok( scalar(@pdls) == 6 , 'rewind');
 $mat->close;
 
-write_matlab('tst.mat',zeroes(10),ones(5));
-($x,$y) = read_matlab('tst.mat');
+matlab_write('tst.mat',zeroes(10),ones(5));
+($x,$y) = matlab_read('tst.mat');
 
-ok( (tapprox($x,zeroes(10)) and tapprox($y,ones(5))), 'read_matlab write_matlab');
+ok( (tapprox($x,zeroes(10)) and tapprox($y,ones(5))), 'matlab_read matlab_write');
 
-write_matlab('tst.mat', 'MAT73', zeroes(10));
-($x) = read_matlab('tst.mat');
-ok( tapprox($x,zeroes(10)), 'read_matlab write_matlab, MAT73');
+matlab_write('tst.mat', 'MAT73', zeroes(10));
+($x) = matlab_read('tst.mat');
+ok( tapprox($x,zeroes(10)), 'matlab_read matlab_write, MAT73');
 
-write_matlab('tst.mat', sequence(5));
-$x = read_matlab('tst.mat', {onedr => 0} );
+matlab_write('tst.mat', sequence(5));
+$x = matlab_read('tst.mat', {onedr => 0} );
 ok( tapprox($x->shape, pdl [5, 1]), 'onedr => 0');
 
-write_matlab('tst.mat', sequence(5), {onedw => 2} );
-$x = read_matlab('tst.mat', {onedr => 0} );
+matlab_write('tst.mat', sequence(5), {onedw => 2} );
+$x = matlab_read('tst.mat', {onedr => 0} );
 ok( tapprox($x->shape, pdl [1, 5]), 'onedr => 0 , onedw => 2');
 
 done_testing();

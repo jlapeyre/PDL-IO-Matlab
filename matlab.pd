@@ -57,17 +57,19 @@ this module.
 =head1 SYNOPSIS
 
  use PDL;
- use PDL::IO::Matlab qw( read_matlab write_matlab );
+ use PDL::IO::Matlab qw( matlab_read matlab_write matlab_print_info);
 
  # write two pdls in matlab 5 format
- write_matlab('file.dat', $x, $y);
+ matlab_write('file.dat', $x, $y);
 
  # read an array of piddles 
  # from file in matlab 4, 5, or 7.3 format.
- my @pdls =  read_matlab('file.dat');
+ my @pdls =  matlab_read('file.dat');
  
  # write pdl in matlab 7.3 format.
- write_matlab('file.dat', 'MAT73', $x);
+ matlab_write('file.dat', 'MAT73', $x);
+
+ matlab_print_info('file.dat');
 
 =cut
 
@@ -103,23 +105,23 @@ my %Inv_format_list =  (
 
 The functional interface.
 
-=head2 B<read_matlab>
+=head2 B<matlab_read>
 
 =head3 Usage
 
 Return all arrays in C<$filename>
 
- @pdls = read_matlab($filename);
- @pdls = read_matlab($filename, {OPTIONS});
+ @pdls = matlab_read($filename);
+ @pdls = matlab_read($filename, {OPTIONS});
 
 Return first array in C<$filename>
 
- $x = read_matlab($filename);
+ $x = matlab_read($filename);
 
 Do not automatically convert C<1xn> and C<nx1> arrays
 to 1-d arrays.
 
- @pdls = read_matlab($filename, { onedr => 0 } );
+ @pdls = matlab_read($filename, { onedr => 0 } );
 
 Reads all data in the file C<$filename>.
 Formats 4, 5, and 7.3 are supported. Options
@@ -127,7 +129,7 @@ are passed to L</B<new>>.
 
 =cut
 
-sub read_matlab {
+sub matlab_read {
     my ($filename,$opts) = @_;
     my $mat = PDL::IO::Matlab->new($filename, '<', $opts || {});
     my @res = $mat->read_all;
@@ -136,29 +138,29 @@ sub read_matlab {
 }
 
 
-=head2 B<write_matlab>
+=head2 B<matlab_write>
 
 =head3 Usage
 
- write_matlab($filename,$x1,$x2,...);
- write_matlab($filename,$format,$x1,$x2,...);
+ matlab_write($filename,$x1,$x2,...);
+ matlab_write($filename,$format,$x1,$x2,...);
 
 Automatically convert C<n> element, 1-d piddles to C<1xn> matlab
 variables.
 
- write_matlab($filename,$x1,$x2,..., {onedw => 1} );
+ matlab_write($filename,$x1,$x2,..., {onedw => 1} );
 
 Automatically convert C<nx1> matlab
 variables.
 
- write_matlab($filename,$x1,$x2,..., {onedw => 2} );
+ matlab_write($filename,$x1,$x2,..., {onedw => 2} );
 
 This method writes pdls C<$x1>, C<$x2>,.... If present, C<$format>
 must be either C<'MAT5'> or C<'MAT73'>.
 
 =cut
 
-sub write_matlab {
+sub matlab_write {
     my @strings;
     my @hashes;
     my @refs;
@@ -176,7 +178,7 @@ sub write_matlab {
             push @strings, $v;
         }
     }
-    barf 'write_matlab: ' . scalar(@strings) . 
+    barf 'matlab_write: ' . scalar(@strings) . 
         ' string arguments given. One or two expected.'
         if @strings < 1 or @strings > 2 ;
     my $filename = $strings[0];
@@ -187,6 +189,29 @@ sub write_matlab {
     $mat->write(@refs) if @refs;
     $mat->close;
     scalar(@refs);
+}
+
+=head2 B<matlab_print_info>
+
+=head3 Usage
+
+ # print names and dimensions of variables.
+ matlab_print_info($filename);
+ # also print a small amount of the data.
+ matlab_print_info($filename, { data => 1 });
+ # This does the same thing.
+ matlab_print_info($filename,  data => 1 );
+
+Print information about the contents of the matlab file C<$filename>,
+including the name, dimension and class type of the variables.
+
+=cut
+
+sub matlab_print_info {
+    my $name = shift;
+    my $mat = PDL::IO::Matlab->new($name, '<');
+    $mat->print_all_var_info(@_);
+    $mat->close;
 }
 
 =head1 METHODS
@@ -209,6 +234,9 @@ sub write_matlab {
 
  # read-write  with rw or <>
  $mat = PDL::IO::Matlab->new('file.dat', 'rw');  
+
+ # open for reading
+ $mat = PDL::IO::Matlab->new('file.dat', '<');
 
 =head3 Options
 
@@ -505,7 +533,7 @@ sub get_version {
  $mat->print_all_var_info;
 
  # also print a small amount of data from each variable.
- $mat->print_all_var_info( {print_data => 1} );
+ $mat->print_all_var_info( data => 1 );
 
 Print a summary of all data in the file associated
 with C<$mat> (starting from the next unread variable.)
@@ -514,9 +542,17 @@ with C<$mat> (starting from the next unread variable.)
 
 sub print_all_var_info {
     my $self = shift;
-    my %user_options = @_;
-    my %opts = parse( {print_data => 0} , \%user_options);
-    my $printdata = $opts{print_data} ? 1 : 0;
+    my $len = scalar(@_);
+    my $user_options = {};
+    if ( $len == 1 ) {
+        $user_options = $_[0];
+    }
+    elsif ( $len > 1 ) {
+        my %user_option_hash = @_;
+        $user_options = \%user_option_hash;
+    }
+    my %opts = parse( {data => 0} , $user_options);
+    my $printdata = $opts{data} ? 1 : 0;
     my $handle = $self->get_handle;
     _extra_matio_print_all_var_info($handle,$printdata);
 }
@@ -629,6 +665,8 @@ build or function correctly when used on other platforms.
 
 John Lapeyre, C<< <jlapeyre at cpan.org> >>
 
+The matio library was written by Christopher C. Hulbert.
+
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2012 John Lapeyre.
@@ -671,7 +709,7 @@ pp_addhdr( qq{
 #include "convert_matvar_pdl.c"
 });
 
-pp_add_exported qw( read_matlab write_matlab );
+pp_add_exported qw( matlab_read matlab_write matlab_print_info );
 
 # The line MODULE = ... is also added by PP, so this
 # is redundant
