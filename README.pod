@@ -17,65 +17,82 @@ this module.
 =head1 SYNOPSIS
 
  use PDL;
- use PDL::IO::Matlab qw( read_matlab write_matlab );
+ use PDL::IO::Matlab qw( matlab_read matlab_write matlab_print_info);
 
  # write two pdls in matlab 5 format
- write_matlab('file.dat', $x, $y);
+ matlab_write('file.dat', $x, $y);
 
  # read an array of piddles 
  # from file in matlab 4, 5, or 7.3 format.
- my @pdls =  read_matlab('file.dat');
+ my @pdls =  matlab_read('file.dat');
  
  # write pdl in matlab 7.3 format.
- write_matlab('file.dat', 'MAT73', $x);
+ matlab_write('file.dat', 'MAT73', $x);
+
+ matlab_print_info('file.dat');
 
 =cut
 =head1 FUNCTIONS
 
 The functional interface.
 
-=head2 B<read_matlab>
+=head2 B<matlab_read>
 
 =head3 Usage
 
 Return all arrays in C<$filename>
 
- @pdls = read_matlab($filename);
- @pdls = read_matlab($filename, {OPTIONS});
+ @pdls = matlab_read($filename);
+ @pdls = matlab_read($filename, {OPTIONS});
 
 Return first array in C<$filename>
 
- $x = read_matlab($filename);
+ $x = matlab_read($filename);
 
 Do not automatically convert C<1xn> and C<nx1> arrays
 to 1-d arrays.
 
- @pdls = read_matlab($filename, { onedr => 0 } );
+ @pdls = matlab_read($filename, { onedr => 0 } );
 
 Reads all data in the file C<$filename>.
 Formats 4, 5, and 7.3 are supported. Options
 are passed to L</B<new>>.
 
 =cut
-=head2 B<write_matlab>
+=head2 B<matlab_write>
 
 =head3 Usage
 
- write_matlab($filename,$x1,$x2,...);
- write_matlab($filename,$format,$x1,$x2,...);
+ matlab_write($filename,$x1,$x2,...);
+ matlab_write($filename,$format,$x1,$x2,...);
 
 Automatically convert C<n> element, 1-d piddles to C<1xn> matlab
 variables.
 
- write_matlab($filename,$x1,$x2,..., {onedw => 1} );
+ matlab_write($filename,$x1,$x2,..., {onedw => 1} );
 
 Automatically convert C<nx1> matlab
 variables.
 
- write_matlab($filename,$x1,$x2,..., {onedw => 2} );
+ matlab_write($filename,$x1,$x2,..., {onedw => 2} );
 
 This method writes pdls C<$x1>, C<$x2>,.... If present, C<$format>
 must be either C<'MAT5'> or C<'MAT73'>.
+
+=cut
+=head2 B<matlab_print_info>
+
+=head3 Usage
+
+ # print names and dimensions of variables.
+ matlab_print_info($filename);
+ # also print a small amount of the data.
+ matlab_print_info($filename, { data => 1 });
+ # This does the same thing.
+ matlab_print_info($filename,  data => 1 );
+
+Print information about the contents of the matlab file C<$filename>,
+including the name, dimension and class type of the variables.
 
 =cut
 =head1 METHODS
@@ -99,6 +116,9 @@ must be either C<'MAT5'> or C<'MAT73'>.
  # read-write  with rw or <>
  $mat = PDL::IO::Matlab->new('file.dat', 'rw');  
 
+ # open for reading
+ $mat = PDL::IO::Matlab->new('file.dat', '<');
+
 =head3 Options
 
 =over
@@ -116,7 +136,7 @@ A header (a string) to write into the file.
 A hash key that will be used to store the matlab name
 for a variable read from a file in the header of a piddle.
 The default value is 'NAME'. Thus, the name can be accessed
-via C<$pdl->hdr->{NAME}>.
+via C<< $pdl->hdr->{NAME} >>.
 
 =item varbasew
 
@@ -229,7 +249,7 @@ C<$mat>. One of C<'MAT4'>, C<'MAT5'>, or C<'MAT73'>.
  $mat->print_all_var_info;
 
  # also print a small amount of data from each variable.
- $mat->print_all_var_info( {print_data => 1} );
+ $mat->print_all_var_info( data => 1 );
 
 Print a summary of all data in the file associated
 with C<$mat> (starting from the next unread variable.)
@@ -299,6 +319,8 @@ build or function correctly when used on other platforms.
 =head1 AUTHOR
 
 John Lapeyre, C<< <jlapeyre at cpan.org> >>
+
+The matio library was written by Christopher C. Hulbert.
 
 =head1 LICENSE AND COPYRIGHT
 
