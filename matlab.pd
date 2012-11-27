@@ -150,7 +150,7 @@ variables.
 
  matlab_write($filename,$x1,$x2,..., {onedw => 1} );
 
-Automatically convert C<nx1> matlab
+Automatically convert to C<nx1> matlab
 variables.
 
  matlab_write($filename,$x1,$x2,..., {onedw => 2} );
