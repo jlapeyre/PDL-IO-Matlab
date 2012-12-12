@@ -430,7 +430,7 @@ Append pdls to open file associated with C<$mat>.
 
 If a piddle has a matlab name stored in the header
 it will be used as the matlab name written to the file
-with this piddle. The key is in C<$pdl->{namekey}>,
+with this piddle. The key is in C<< $pdl->{namekey} >>,
 with default value C<'NAME'>. If the name is not in
 the piddle's header, then a default value will be used.
 
