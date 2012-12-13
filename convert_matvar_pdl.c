@@ -182,10 +182,13 @@ matvar_t * pdl_to_matvar (pdl * piddle, char *varname, int onedw) {
   return matvar;
 }
 
-int write_pdl_to_matlab_file (mat_t *mat, pdl *piddle, char *varname, int onedw) {
+int write_pdl_to_matlab_file (mat_t *mat, pdl *piddle, char *varname, int onedw,
+                              int compress) {
   matvar_t * matvar;
   matvar = pdl_to_matvar(piddle,varname,onedw);
-  int retval =  Mat_VarWrite(mat, matvar, MAT_COMPRESSION_NONE);
+  int retval;
+  if ( compress == 1 ) retval =  Mat_VarWrite(mat, matvar, MAT_COMPRESSION_ZLIB);
+  else retval =  Mat_VarWrite(mat, matvar, MAT_COMPRESSION_NONE);
   Mat_VarFree(matvar);
   return retval;
 }

@@ -246,6 +246,10 @@ sub matlab_print_info {
 
 Either C<'MAT5'> or C<'MAT73'>.
 
+=item compress
+
+Either C<1> for yes, or C<0> for no.
+
 =item header
 
 A header (a string) to write into the file.
@@ -267,6 +271,9 @@ variable.
 
 =back
 
+The option C<compress> enables zlib compression if the zlib library
+is available and if the data file format is C<'MAT5'>.
+
 =cut
 
 sub new {
@@ -279,7 +286,8 @@ sub new {
             namekey => 'NAME',
             varbasew => 'variable',
             onedw => 1,
-            onedr => 1
+            onedr => 1,
+            compress => 0
         });
     $iopts ||= {};
 
@@ -447,6 +455,11 @@ If C<onedw> is zero (the default), then the 1-d pdl is written
 as a 1-d piddle. In the last case,
 Octave will print an error and fail to read the variable.
 
+=item compress
+
+If C<compress> is C<1> then zlib compression is used, if the library
+is available and if the format is C<'MAT5'>.
+
 =back
 
 =cut
@@ -475,10 +488,11 @@ sub write {
    my $opts = @hashes ? $hashes[0] : {} ;
    my $onedw = exists $opts->{onedw} ? $opts->{onedw} : $self->get_onedw;
    $onedw = 1 if $onedw == 0 and $self->get_format eq 'MAT73'; # else crash
+   my $compress = exists $opts->{compress} ? $opts->{compress} : $self->get_compress;
    foreach (@pdls) {
        my $name = exists $_->hdr->{$self->get_namekey} ?
            $_->hdr->{$self->get_namekey} : $self->_make_write_var_name;
-       _write_pdl_to_matlab_file($self->get_handle,$_, $name, $onedw );
+       _write_pdl_to_matlab_file($self->get_handle,$_, $name, $onedw, $compress);
    }
    return $self;
 }
@@ -563,7 +577,7 @@ sub write_accessors {
  # !e means barf in get_property if property is not set.
     my @funcs = qw(
         handle!e  mode!e filename!e format header
-        varbasew!e onedw!e onedr!e namekey!e wvarnum!e );
+        varbasew!e onedw!e onedr!e namekey!e wvarnum!e compress!e);
     my $s = '';
     my @accessors;
     my $errs;
@@ -937,13 +951,14 @@ if (retval != NULL) PDL->SetSV_PDL(ST(0),retval);
 =cut
 
 int
-_write_pdl_to_matlab_file (mat, piddle, varname, oned)
+_write_pdl_to_matlab_file (mat, piddle, varname, oned, compress)
 mat_t * mat
 pdl * piddle
 char * varname
 int oned
+int compress
 CODE:
-RETVAL = write_pdl_to_matlab_file (mat, piddle, varname, oned);
+RETVAL = write_pdl_to_matlab_file (mat, piddle, varname, oned, compress);
 OUTPUT:
 RETVAL
 
