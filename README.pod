@@ -71,10 +71,14 @@ variables.
 
  matlab_write($filename,$x1,$x2,..., {onedw => 1} );
 
-Automatically convert C<nx1> matlab
+Automatically convert to C<nx1> matlab
 variables.
 
  matlab_write($filename,$x1,$x2,..., {onedw => 2} );
+
+Use zlib compression
+
+ matlab_write($filename,$x1,$x2,..., {compress => 1} );
 
 This method writes pdls C<$x1>, C<$x2>,.... If present, C<$format>
 must be either C<'MAT5'> or C<'MAT73'>.
@@ -127,6 +131,10 @@ including the name, dimension and class type of the variables.
 
 Either C<'MAT5'> or C<'MAT73'>.
 
+=item compress
+
+Either C<1> for yes, or C<0> for no.
+
 =item header
 
 A header (a string) to write into the file.
@@ -147,6 +155,9 @@ initialized to zero and is incremented after writing each
 variable.
 
 =back
+
+The option C<compress> enables zlib compression if the zlib library
+is available and if the data file format is C<'MAT5'>.
 
 =cut
 =head2 B<close>
@@ -194,7 +205,7 @@ Append pdls to open file associated with C<$mat>.
 
 If a piddle has a matlab name stored in the header
 it will be used as the matlab name written to the file
-with this piddle. The key is in C<$pdl->{namekey}>,
+with this piddle. The key is in C<< $pdl->{namekey} >>,
 with default value C<'NAME'>. If the name is not in
 the piddle's header, then a default value will be used.
 
@@ -210,6 +221,11 @@ then the output piddle is C<1xn> and the matlab variable C<nx1>.
 If C<onedw> is zero (the default), then the 1-d pdl is written
 as a 1-d piddle. In the last case,
 Octave will print an error and fail to read the variable.
+
+=item compress
+
+If C<compress> is C<1> then zlib compression is used, if the library
+is available and if the format is C<'MAT5'>.
 
 =back
 
@@ -260,7 +276,7 @@ with C<$mat> (starting from the next unread variable.)
 The following are additional accessor methods for the matlab file objects
 PDL::IO::Matlab.
 
-get_handle set_handle get_mode set_mode get_filename set_filename get_format set_format get_header set_header get_varbasew set_varbasew get_onedw set_onedw get_onedr set_onedr get_namekey set_namekey get_wvarnum set_wvarnum
+get_handle set_handle get_mode set_mode get_filename set_filename get_format set_format get_header set_header get_varbasew set_varbasew get_onedw set_onedw get_onedr set_onedr get_namekey set_namekey get_wvarnum set_wvarnum get_compress set_compress
 
 
 
