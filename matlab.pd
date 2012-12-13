@@ -155,6 +155,10 @@ variables.
 
  matlab_write($filename,$x1,$x2,..., {onedw => 2} );
 
+Use zlib compression
+
+ matlab_write($filename,$x1,$x2,..., {compress => 1} );
+
 This method writes pdls C<$x1>, C<$x2>,.... If present, C<$format>
 must be either C<'MAT5'> or C<'MAT73'>.
 
