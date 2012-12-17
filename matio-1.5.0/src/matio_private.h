@@ -60,7 +60,9 @@
  * @endif
  */
 struct _mat_t {
-    void *fp;               /**< File pointer for the MAT file */
+  /*    void *fp;  */          /**< File pointer for the MAT file */
+  /* gjl 2012 */
+    FILE *fp;               /**< File pointer for the MAT file */
     char *header;           /**< MAT File header string */
     char *subsys_offset;    /**< offset */
     char *filename;         /**< Filename of the MAT file */
