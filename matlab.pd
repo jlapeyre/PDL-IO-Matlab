@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-our $VERSION = '0.003';
+our $VERSION = '0.004';
 pp_setversion("'$VERSION'");
 
 my $Matio_src = 'matio-1.5.0/src';
