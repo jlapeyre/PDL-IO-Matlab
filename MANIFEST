@@ -31,16 +31,12 @@ matio-1.5.0/Makefile.am
 matio-1.5.0/NEWS
 matio-1.5.0/documentation/Makefile.in
 matio-1.5.0/documentation/Makefile.am
-matio-1.5.0/patches
-matio-1.5.0/patches/inflate.patch
 matio-1.5.0/COPYING
 matio-1.5.0/aclocal.m4
 matio-1.5.0/visual_studio/._matioConfig.h
 matio-1.5.0/visual_studio/matio.def
 matio-1.5.0/visual_studio/._matio_pubconf.h
 matio-1.5.0/visual_studio/matioConfig.h
-matio-1.5.0/visual_studio/matdump
-matio-1.5.0/visual_studio/matdump/matdump.vcproj
 matio-1.5.0/visual_studio/._matio.def
 matio-1.5.0/visual_studio/matio_pubconf.h
 matio-1.5.0/visual_studio/libmatio
