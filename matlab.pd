@@ -527,6 +527,29 @@ Return name of file associated with C<$mat>.
 
 =cut
 
+=head2 B<get_header>
+
+=head3 Usage
+
+ $mat->get_header
+
+Return the header string from the matlab data file associated with
+C<$mat>.
+
+=cut
+
+sub get_header {
+    my $self = shift;
+    return defined $self->{header} ? 
+        $self->{header} : defined $self->{handle} ?
+        _mat_get_header($self->{handle}) : undef;
+}
+
+sub set_header {
+    my $self = shift;
+    $self->{header} = shift;
+}
+
 =head2 B<get_format>
 
 =head3 Usage
@@ -538,10 +561,11 @@ C<$mat>. One of C<'MAT4'>, C<'MAT5'>, or C<'MAT73'>.
 
 =cut
 
+# I am not using this ??
+# version here means file format, use get_format instead
 sub get_version {
     my $self = shift;
     my $val = _mat_get_version($self->get_handle);
-#    print "val = $val\n";
     $Inv_format_list{$val};
 }
 
@@ -581,7 +605,7 @@ EO_MIDDLE
 sub write_accessors {
  # !e means barf in get_property if property is not set.
     my @funcs = qw(
-        handle!e  mode!e filename!e format header
+        handle!e  mode!e filename!e format
         varbasew!e onedw!e onedr!e namekey!e wvarnum!e compress!e);
     my $s = '';
     my @accessors;
@@ -614,10 +638,12 @@ The following are additional accessor methods for the matlab file objects
 PDL::IO::Matlab.
 
 "
-. join(' ',@accessors);
+. join(' ',@accessors) .
+
 "
 =cut
 ";
+
  $s;
 }
 
@@ -870,7 +896,25 @@ if (RETVAL == -1) barf("PDL::IO::Matlab::rewind Bad filehandle");
 OUTPUT:
 RETVAL
 
-=pod
+char *
+_mat_get_header(mat)
+mat_t * mat
+CODE:
+RETVAL = Mat_GetHeader(mat);
+OUTPUT:
+RETVAL
+
+char *
+_mat_get_filename(mat)
+mat_t * mat
+CODE:
+RETVAL = Mat_GetFilename(mat);
+OUTPUT:
+RETVAL
+
+');
+
+=for comment
 
 int
 _my_mat_feof(mat)
@@ -881,10 +925,6 @@ OUTPUT:
 RETVAL
 
 =cut
-
-
-');
-
 
 
 pp_addxs ( '',  '

@@ -249,6 +249,7 @@ EXTERN mat_t      *Mat_CreateVer(const char *matname,const char *hdr_str,
 EXTERN int         Mat_Close(mat_t *mat);
 EXTERN mat_t      *Mat_Open(const char *matname,int mode);
 EXTERN const char *Mat_GetFilename(mat_t *matfp);
+EXTERN const char *Mat_GetHeader(mat_t *matfp); /* gjl March 2013 added function */
 EXTERN enum mat_ft Mat_GetVersion(mat_t *matfp);
 EXTERN int         Mat_Rewind(mat_t *mat);
 

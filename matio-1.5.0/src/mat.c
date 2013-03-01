@@ -340,6 +340,23 @@ Mat_GetFilename(mat_t *matfp)
     return filename;
 }
 
+/* gjl March 2013  Mat_GetHeader */
+/** @brief Gets the header for the given MAT file
+ *
+ * Gets the header for the given MAT file
+ * @ingroup MAT
+ * @param mat Pointer to the MAT file
+ * @return MAT header
+ */
+const char *
+Mat_GetHeader(mat_t *matfp)
+{
+    const char *header = NULL;
+    if ( NULL != matfp )
+        header = matfp->header;
+    return header;
+}
+
 /** @brief Gets the version of the given MAT file
  *
  * Gets the version of the given MAT file

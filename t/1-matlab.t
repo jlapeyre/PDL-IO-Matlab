@@ -2,7 +2,7 @@
 
 use strict; use warnings;
 
-use Test::More tests => 17;
+use Test::More tests => 18;
 
 use PDL;
 use PDL::IO::Matlab qw ( matlab_read matlab_write );
@@ -31,6 +31,7 @@ $mat->close();
 $mat = PDL::IO::Matlab->new($f, '<');
 ok($mat != 0 , 'file opened for read');
 ok($mat->get_version eq 'MAT5', 'file format MAT5');
+ok($mat->get_header, 'read header');
 
 $x = $mat->read_next;
 $mat->close();
