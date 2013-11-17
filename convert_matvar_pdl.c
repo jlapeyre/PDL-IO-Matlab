@@ -1,19 +1,4 @@
-/*
-
-Following taken from pdl.h.
-This is platform dependent, so I need something more sophisticated.
-
-enum pdl_datatypes { PDL_B, PDL_S, PDL_US, PDL_L, PDL_LL, PDL_F, PDL_D };
-
-typedef unsigned char      PDL_Byte;
-typedef short              PDL_Short;
-typedef unsigned short     PDL_Ushort;
-typedef int                PDL_Long;
-typedef long               PDL_LongLong;
-typedef float              PDL_Float;
-typedef double             PDL_Double;
-
-*/
+#include <pdl.h>
 
 static char *matvar_class_type_desc[16] = 
   {"Undefined","Cell Array","Structure",
@@ -62,28 +47,26 @@ static int  matvar_class_to_pdl_type[16] =
   };
 
 
-/* enum pdl_datatypes { PDL_B, PDL_S, PDL_US, PDL_L, PDL_LL, PDL_F, PDL_D }; */
-
-static int  pdl_type_to_matvar_type[7] = 
+static int  pdl_type_to_matvar_type[] =
   {
-       MAT_T_INT8, /* PDL_B */
-      MAT_T_INT16, /* PDL_S */
-     MAT_T_UINT16, /* PDL_US */
-      MAT_T_INT32, /* PDL_L */
-      MAT_T_INT32, /* PDL_LL */
-     MAT_T_SINGLE, /* PDL_F */
-     MAT_T_DOUBLE, /* PDL_D */
+    [PDL_B]  = MAT_T_INT8,
+    [PDL_S]  = MAT_T_INT16,
+    [PDL_US] = MAT_T_UINT16,
+    [PDL_L]  = MAT_T_INT32,
+    [PDL_LL] = MAT_T_INT32,
+    [PDL_F]  = MAT_T_SINGLE,
+    [PDL_D]  = MAT_T_DOUBLE,
   };
 
-static int  pdl_type_to_matvar_class[7] = 
+static int  pdl_type_to_matvar_class[] =
   {
-       MAT_C_INT8, /* PDL_B */
-      MAT_C_INT16, /* PDL_S */
-     MAT_C_UINT16, /* PDL_US */
-      MAT_C_INT32, /* PDL_L */
-      MAT_C_INT32, /* PDL_LL */
-     MAT_C_SINGLE, /* PDL_F */
-     MAT_C_DOUBLE, /* PDL_D */
+    [PDL_B]  = MAT_C_INT8,
+    [PDL_S]  = MAT_C_INT16,
+    [PDL_US] = MAT_C_UINT16,
+    [PDL_L]  = MAT_C_INT32,
+    [PDL_LL] = MAT_C_INT32,
+    [PDL_F]  = MAT_C_SINGLE,
+    [PDL_D]  = MAT_C_DOUBLE,
   };
 
 
@@ -96,7 +79,7 @@ static void delete_matvar_to_pdl_data(pdl* p, size_t param)
 
 typedef void (*DelMagic)(pdl *, size_t param);
 static void default_magic(pdl *p, size_t  pa) { p->data = 0; }
-static pdl* my_pdl_wrap(void *data, int datatype, PDL_Long dims[],
+static pdl* my_pdl_wrap(void *data, int datatype, PDL_Indx dims[],
                         int ndims, DelMagic delete_magic, int delparam)
 {
   pdl* npdl = PDL->pdlnew();
@@ -115,10 +98,10 @@ static pdl* matvar_to_pdl (matvar_t * matvar, int onedr) {
   int ndims = matvar->rank;
   pdl * piddle;
   int i, pdl_data_type;
-  PDL_Long * dims;
+  PDL_Indx * dims;
   if ( matvar->isComplex )
     barf("matvar_to_pdl: Complex matlab variables not supported.");
-  dims = (PDL_Long *)malloc(sizeof(PDL_Long) * ndims);
+  dims = (PDL_Indx *)malloc(sizeof(PDL_Indx) * ndims);
   //  fprintf(stderr, "ONEDR %d\n", onedr);
   if (ndims == 2 && onedr != 0 ) {
     if (matvar->dims[0] == 1) {
