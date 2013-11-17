@@ -16,17 +16,17 @@ void extra_matio_print_all_var_info_clumsy(mat_t * matfp) {
     printf("%-20s", matvar->name);
     if ( matvar->rank > 0 ) {
       int cnt = 0;
-      printf("%8d", matvar->dims[0]);
+      printf("%8zd", matvar->dims[0]);
       for ( i = 1; i < matvar->rank; i++ ) {
         if ( ceil(log10(matvar->dims[i]))+1 < 32 )
-          cnt += sprintf(size+cnt,"x%d", matvar->dims[i]);
+          cnt += sprintf(size+cnt,"x%zd", matvar->dims[i]);
       }
       printf("%-10s",size);
     } else {
       printf("                    ");
     }
     nbytes = Mat_VarGetSize(matvar);
-    printf("  %8d",nbytes);
+    printf("  %8zd",nbytes);
     printf("         %-18s\n",mxclass[matvar->class_type-1]);
     Mat_VarPrint(matvar,0);
     Mat_VarFree(matvar);
