@@ -1263,6 +1263,11 @@ Mat_VarPrint( matvar_t *matvar, int printdata )
     if ( matvar->isComplex )
         printf(" (complex)");
     printf("\n");
+    printf("Compresson: "); /* gjl march 2013 */
+    if ( matvar->compression == MAT_COMPRESSION_NONE ) printf("none");
+    else  if ( matvar->compression == MAT_COMPRESSION_ZLIB ) printf("zlib");
+    else printf("unknown");
+    printf("\n");
     if ( matvar->data_type )
         printf(" Data Type: %s\n", data_type_desc[matvar->data_type]);
 
