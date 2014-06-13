@@ -9,7 +9,7 @@ data files in Matlab formats. The module uses the matio C library.
 Both functional and OO interface are provided.
 
 Only real, multi-dimensional arrays corresponding to PDL data types are supported.
-Compression is currently only supported when reading.
+Compression for both reading and writing is supported.
 
 See the section L</CAVEATS> for important information on potential problems when using
 this module.
@@ -249,6 +249,16 @@ Reset pointer to the head of the file.
 Return name of file associated with C<$mat>.
 
 =cut
+=head2 B<get_header>
+
+=head3 Usage
+
+ $mat->get_header
+
+Return the header string from the matlab data file associated with
+C<$mat>.
+
+=cut
 =head2 B<get_format>
 
 =head3 Usage
@@ -277,10 +287,8 @@ with C<$mat> (starting from the next unread variable.)
 The following are additional accessor methods for the matlab file objects
 PDL::IO::Matlab.
 
-get_handle set_handle get_mode set_mode get_filename set_filename get_format set_format get_header set_header get_varbasew set_varbasew get_onedw set_onedw get_onedr set_onedr get_namekey set_namekey get_wvarnum set_wvarnum get_compress set_compress
-
-
-
+get_handle set_handle get_mode set_mode get_filename set_filename get_format set_format get_varbasew set_varbasew get_onedw set_onedw get_onedr set_onedr get_namekey set_namekey get_wvarnum set_wvarnum get_compress set_compress
+=cut
 =head1 CAVEATS
 
 =head2 complicating factors
