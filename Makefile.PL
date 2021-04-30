@@ -19,15 +19,13 @@ my $matlab_package = ['matlab.pd', 'Matlab', 'PDL::IO::Matlab'];
 my %hash = pdlpp_stdargs($matlab_package);
 
 my %more_items = (
-    NAME                => 'PDL::IO::Matlab',
     AUTHOR              => q{John Lapeyre <jlapeyre@cpan.org>},
-    VERSION_FROM        => 'matlab.pd',
     ABSTRACT_FROM       => 'matlab.pd',
-    PL_FILES            => {},
-    OBJECT  =>  ' Matlab.o matio_obj.o ' ,
+    OBJECT  =>  ' Matlab$(OBJ_EXT) matio_obj$(OBJ_EXT) ' ,
     LIBS => [ ' -lz -lhdf5 ' ],
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => '6.64', # TEST_REQUIRES
+        'PDL' => '2.043',
     },
     TEST_REQUIRES => {
         'Test::More' => '0.88', # done_testing
@@ -39,16 +37,13 @@ my %more_items = (
     clean               => { FILES => ' PDL-IO-Matlab-* Matlab.* tst.mat testf.mat ' . 
                                  $matio_top_level . '/test/atconfig' },
 );
-
-map { $hash{$_} = $more_items{$_} } keys %more_items;
-
-#	cd $matio_top_level; ./configure
+%hash = (%hash, %more_items);
 
 sub MY::postamble {   qq{
 
-matio_obj.o:
+matio_obj\$(OBJ_EXT):
 	cd $matio_top_level; cd src; \$(MAKE)
-	ld -r -o matio_obj.o $matio_top_level/src/.libs/*.o
+	ld -r -o matio_obj\$(OBJ_EXT) $matio_top_level/src/.libs/*\$(OBJ_EXT)
 
 cleanall: clean
 	cd $matio_top_level; \$(MAKE) clean
