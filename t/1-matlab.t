@@ -1,8 +1,6 @@
-#!perl
-
 use strict; use warnings;
 
-use Test::More tests => 18;
+use Test::More;
 
 use PDL;
 use PDL::IO::Matlab qw ( matlab_read matlab_write );
@@ -84,4 +82,3 @@ $x = matlab_read('tst.mat', {onedr => 0} );
 ok( tapprox($x->shape, pdl [1, 5]), 'onedr => 0 , onedw => 2');
 
 done_testing();
-

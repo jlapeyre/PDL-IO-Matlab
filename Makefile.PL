@@ -26,11 +26,15 @@ my %more_items = (
     PL_FILES            => {},
     OBJECT  =>  ' Matlab.o matio_obj.o ' ,
     LIBS => [ ' -lz -lhdf5 ' ],
-    PREREQ_PM => {
-        'Test::More' => 0,
-        'PDL' => 0,
+    CONFIGURE_REQUIRES => {
+        'ExtUtils::MakeMaker' => '6.64', # TEST_REQUIRES
     },
-    dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    TEST_REQUIRES => {
+        'Test::More' => '0.88', # done_testing
+    },
+    PREREQ_PM => {
+        'PDL' => '2.043',
+    },
     # note the file below that matio Makefile fails to clean.
     clean               => { FILES => ' PDL-IO-Matlab-* Matlab.* tst.mat testf.mat ' . 
                                  $matio_top_level . '/test/atconfig' },
