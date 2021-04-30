@@ -16,8 +16,6 @@ sub tapprox {
 my @got_v = PDL::IO::Matlab::get_library_version;
 is_deeply [@got_v[0..1]], [1,5], 'library version' or diag explain \@got_v;
 
-my ($x,$y);
-
 # Write one pdl
 my $f = 'testf.mat';
 my $mat = PDL::IO::Matlab->new($f, '>', {format => 'MAT5'});
@@ -31,7 +29,7 @@ ok($mat != 0 , 'file opened for read');
 ok($mat->get_version eq 'MAT5', 'file format MAT5');
 ok($mat->get_header, 'read header');
 
-$x = $mat->read_next;
+my $x = $mat->read_next;
 $mat->close();
 
 ok(tapprox($x,sequence(10)), 'read data same as write data');
@@ -65,20 +63,23 @@ ok( scalar(@pdls) == 6 , 'rewind');
 $mat->close;
 
 matlab_write('tst.mat',zeroes(10),ones(5));
-($x,$y) = matlab_read('tst.mat');
+($x,my $y) = matlab_read('tst.mat');
 
-ok( (tapprox($x,zeroes(10)) and tapprox($y,ones(5))), 'matlab_read matlab_write');
+ok tapprox($x,zeroes(10)), 'matlab_read matlab_write 1' or diag "got:$x";
+ok tapprox($y,ones(5)), 'matlab_read matlab_write 2' or diag "got:$y";
 
-matlab_write('tst.mat', 'MAT73', zeroes(10));
-($x) = matlab_read('tst.mat');
-ok( tapprox($x,zeroes(10)), 'matlab_read matlab_write, MAT73');
+if (PDL::IO::Matlab::_have_hdf5()) {
+  matlab_write('tst.mat', 'MAT73', zeroes(10));
+  ($x) = matlab_read('tst.mat');
+  ok( tapprox($x,zeroes(10)), 'matlab_read matlab_write, MAT73');
 
-matlab_write('tst.mat', sequence(5));
-$x = matlab_read('tst.mat', {onedr => 0} );
-ok( tapprox($x->shape, pdl [5, 1]), 'onedr => 0');
+  matlab_write('tst.mat', sequence(5));
+  $x = matlab_read('tst.mat', {onedr => 0} );
+  ok( tapprox($x->shape, pdl [5, 1]), 'onedr => 0');
 
-matlab_write('tst.mat', sequence(5), {onedw => 2} );
-$x = matlab_read('tst.mat', {onedr => 0} );
-ok( tapprox($x->shape, pdl [1, 5]), 'onedr => 0 , onedw => 2');
+  matlab_write('tst.mat', sequence(5), {onedw => 2} );
+  $x = matlab_read('tst.mat', {onedr => 0} );
+  ok( tapprox($x->shape, pdl [1, 5]), 'onedr => 0 , onedw => 2');
+}
 
 done_testing();

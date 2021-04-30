@@ -788,6 +788,17 @@ _mat_close( handle )
   OUTPUT:
   RETVAL
 
+int
+_have_hdf5()
+  CODE:
+#if defined(HAVE_HDF5) && HAVE_HDF5
+  RETVAL = 1;
+#else
+  RETVAL = 0;
+#endif
+  OUTPUT:
+  RETVAL
+
 ');
 
 
