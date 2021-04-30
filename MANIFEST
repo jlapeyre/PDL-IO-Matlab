@@ -91,9 +91,5 @@ matio-1.5.0/visual_studio/matioConfig.h
 matlab.pd
 memory_leak.pl
 README
-t/00-load.t
 t/1-matlab.t
-t/manifest.t
-t/pod-coverage.t
-t/pod.t
 typemap
