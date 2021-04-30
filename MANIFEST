@@ -1,6 +1,7 @@
 Changes
 convert_matvar_pdl.c
 extra_matio.c
+INSTALL
 Makefile.PL
 MANIFEST			This list of files
 matio-1.5.0/aclocal.m4
@@ -50,6 +51,7 @@ matio-1.5.0/Makefile.am
 matio-1.5.0/Makefile.in
 matio-1.5.0/matio.pc.in
 matio-1.5.0/NEWS
+matio-1.5.0/patches/inflate.patch
 matio-1.5.0/README
 matio-1.5.0/share/test_file.mat
 matio-1.5.0/share/test_file_v6.mat
@@ -84,12 +86,15 @@ matio-1.5.0/visual_studio/._matio.def
 matio-1.5.0/visual_studio/._matio_pubconf.h
 matio-1.5.0/visual_studio/._matioConfig.h
 matio-1.5.0/visual_studio/libmatio/libmatio.vcproj
+matio-1.5.0/visual_studio/matdump/matdump.vcproj
 matio-1.5.0/visual_studio/matio.def
 matio-1.5.0/visual_studio/matio.sln
 matio-1.5.0/visual_studio/matio_pubconf.h
 matio-1.5.0/visual_studio/matioConfig.h
 matlab.pd
+matlab_test.pl
 memory_leak.pl
 README
+README.pod
 t/1-matlab.t
 typemap
