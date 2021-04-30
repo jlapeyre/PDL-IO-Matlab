@@ -929,36 +929,12 @@ RETVAL
 
 pp_addxs ( '',  '
 
-=pod
-
-void
-_extra_matio_print_all_var_info_new (matfp,printdata,max_cols,max_rows)
-mat_t * matfp
-int printdata
-int max_cols
-int max_rows
-CODE:
-extra_matio_print_all_var_info (matfp,printdata,max_cols,max_rows);
-
-=cut
-
 void
 _extra_matio_print_all_var_info (matfp,printdata)
 mat_t * matfp
 int printdata
 CODE:
 extra_matio_print_all_var_info(matfp,printdata);
-
-=pod
-
-following was a PITA. This returns undef if the
-reading matvar failed. The library does not seem
-to provide any way to detect EOF.
-
-Important not to use fprintf in this  XS code. Can
-cause segfault.
-
-=cut
 
 void
 _convert_next_matvar_to_pdl(matfp,onedr)
@@ -977,23 +953,6 @@ if (matvar != NULL) {
 }
 XPUSHs(p);
 XPUSHs(s);
-
-
-=pod
-
-old method
-pdl *
-disa_convert_next_matvar_to_pdl(matfp)
-mat_t * matfp
-CODE:
-pdl * retval;
-matvar_t * matvar;
-retval = convert_next_matvar_to_pdl(matfp, &matvar);
-Mat_VarFree(matvar);
-ST(0) = sv_newmortal(); 
-if (retval != NULL) PDL->SetSV_PDL(ST(0),retval);
-
-=cut
 
 int
 _write_pdl_to_matlab_file (mat, piddle, varname, oned, compress)
