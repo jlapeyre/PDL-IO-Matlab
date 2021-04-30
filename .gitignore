@@ -21,5 +21,9 @@ Matlab.xs
 Matlab.bs
 *.mat
 
-
-
+matio-*/matio.pc
+matio-*/src/matioConfig.h
+matio-*/src/matio_pubconf.h
+matio-*/src/stamp-h1
+matio-*/src/stamp-h2
+matio-*/test/atconfig
