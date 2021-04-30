@@ -12,9 +12,9 @@ sub tapprox {
   return $diff < $eps;
 }
 
-
-my @vers = (1,5,0);
-ok( @vers ==  (my @res = PDL::IO::Matlab::get_library_version), 'library version' );
+# allows any 1.5.*
+my @got_v = PDL::IO::Matlab::get_library_version;
+is_deeply [@got_v[0..1]], [1,5], 'library version' or diag explain \@got_v;
 
 my ($x,$y);
 
