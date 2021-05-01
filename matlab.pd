@@ -911,7 +911,7 @@ char *
 _mat_get_header(mat)
 mat_t * mat
 CODE:
-RETVAL = Mat_GetHeader(mat);
+RETVAL = (char *)Mat_GetHeader(mat);
 OUTPUT:
 RETVAL
 
@@ -919,7 +919,7 @@ char *
 _mat_get_filename(mat)
 mat_t * mat
 CODE:
-RETVAL = Mat_GetFilename(mat);
+RETVAL = (char *)Mat_GetFilename(mat);
 OUTPUT:
 RETVAL
 
