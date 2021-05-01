@@ -80,6 +80,8 @@ if (PDL::IO::Matlab::_have_hdf5()) {
   matlab_write('tst.mat', sequence(5), {onedw => 2} );
   $x = matlab_read('tst.mat', {onedr => 0} );
   ok( tapprox($x->shape, pdl [1, 5]), 'onedr => 0 , onedw => 2');
+} else {
+  diag "no HDF5, skipping";
 }
 
 done_testing();

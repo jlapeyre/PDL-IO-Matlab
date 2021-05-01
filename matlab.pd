@@ -744,7 +744,11 @@ EO_MIDDLE_two
 pp_addhdr( qq{
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef DISTRO_MATIO
 #include "$Matio_src/matio.h"
+#else
+#include <matio.h>
+#endif
 //#include "$Matio_src/matio_private.h"
 //#include "$Matio_src/mat5.h"
 //#include "$Matio_src/mat4.h"

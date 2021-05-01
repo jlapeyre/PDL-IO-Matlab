@@ -3,16 +3,41 @@ use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 use PDL::Core::Dev;
+use Devel::CheckLib qw(check_lib);
 
 # Makefile has targets 'cleanall' and 'distcleanall'.
 # These do clean and distclean in both module distribution
 # toplevel and in $matio_top_level.
 
-my $matio_top_level = './matio-1.5.0';
+my ($matio_top_level, $inc, $libs, %object) = ('./matio-1.5.0', '', '');
 
-if ( not -e "$matio_top_level/src/matio_pubconf.h" ) {
+if (check_lib(lib => 'hdf5')) {
+  $libs .= ' -lhdf5';
+  $inc .= ' -DHAVE_HDF5=1';
+} else {
+  my $this_inc = (
+    eval {require PkgConfig; join ' ', PkgConfig->find('hdf5')->get_cflags} ||
+    eval {require ExtUtils::PkgConfig; ExtUtils::PkgConfig->cflags('hdf5')} ||
+    `pkg-config hdf5 --cflags` ||
+    ''
+  );
+  $inc .= ' '.$this_inc.' -DHAVE_HDF5=1' if $this_inc;
+  $libs .= ' '.(
+    eval {require PkgConfig; join ' ', PkgConfig->find('hdf5')->get_ldflags} ||
+    eval {require ExtUtils::PkgConfig; ExtUtils::PkgConfig->libs('hdf5')} ||
+    `pkg-config hdf5 --libs` ||
+    '-lhdf5'
+  );
+}
+
+if (check_lib(lib => 'matio')) {
+  $libs .= ' -lmatio';
+} else {
+  %object = (OBJECT  =>  ' Matlab$(OBJ_EXT) matio_obj$(OBJ_EXT) ');
+  if ( not -e "$matio_top_level/src/matio_pubconf.h" ) {
     print "Makefile.PL: running configure in $matio_top_level\n";
     system "cd $matio_top_level; ./configure";
+  }
 }
 
 my $matlab_package = ['matlab.pd', 'Matlab', 'PDL::IO::Matlab'];
@@ -21,9 +46,10 @@ my %hash = pdlpp_stdargs($matlab_package);
 my %more_items = (
     AUTHOR              => q{John Lapeyre <jlapeyre@cpan.org>},
     ABSTRACT_FROM       => 'matlab.pd',
-    OBJECT  =>  ' Matlab$(OBJ_EXT) matio_obj$(OBJ_EXT) ' ,
-    LIBS => [ ' -lz -lhdf5 ' ],
+    %object,
+    LIBS => [ '-lz' ],
     CONFIGURE_REQUIRES => {
+        'Devel::CheckLib' => '1.14',
         'ExtUtils::MakeMaker' => '6.64', # TEST_REQUIRES
         'PDL' => '2.043',
     },
@@ -38,6 +64,8 @@ my %more_items = (
                                  $matio_top_level . '/test/atconfig' },
 );
 %hash = (%hash, %more_items);
+$hash{INC} .= $inc;
+$hash{LIBS}[0] .= $libs;
 
 sub MY::postamble {   qq{
 
