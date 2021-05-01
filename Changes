@@ -1,3 +1,4 @@
+0.006 2021-05-01
 - add Mat_GetHeader to distributed version of matio (is in upstream as of 2019)
 - Added compression both reading and writing
 - updates from Dima Kogan for PDL 2.007+
