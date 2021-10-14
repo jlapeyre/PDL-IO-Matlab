@@ -81,6 +81,18 @@ distcleanall: distclean
 
 }  . pdlpp_postamble($matlab_package)};
 
+$hash{META_MERGE} = {
+  "meta-spec" => { version => 2 },
+  resources => {
+    bugtracker  => {web=>'https://github.com/jlapeyre/PDL-IO-Matlab/issues'},
+    repository  => {
+       url => 'git://github.com/jlapeyre/PDL-IO-Matlab.git',
+       type => 'git',
+       web => 'https://github.com/jlapeyre/PDL-IO-Matlab',
+    },
+    x_IRC => 'irc://irc.perl.org/#pdl',
+  },
+};
 
 WriteMakefile( %hash );
 
