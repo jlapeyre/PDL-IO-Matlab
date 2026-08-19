@@ -18,6 +18,7 @@ is_deeply [@got_v[0..1]], [1,5], 'library version' or diag explain \@got_v;
 
 # Write one pdl
 my $f = 'testf.mat';
+END { unlink $f }
 my $mat = PDL::IO::Matlab->new($f, '>', {format => 'MAT5'});
 ok( $mat != 0 , 'file opened for write');
 $mat->write(sequence(10));
@@ -63,6 +64,7 @@ ok( scalar(@pdls) == 6 , 'rewind');
 $mat->close;
 
 matlab_write('tst.mat',zeroes(10),ones(5));
+END { unlink 'tst.mat' }
 ($x,my $y) = matlab_read('tst.mat');
 
 ok tapprox($x,zeroes(10)), 'matlab_read matlab_write 1' or diag "got:$x";
