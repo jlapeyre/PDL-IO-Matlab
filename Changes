@@ -1,3 +1,4 @@
+0.007 2026-08-19
 - update to libmatio-1.5.30
 - exception if try to create MAT73 file but available libmatio doesn't support
 - _have_hdf5 now returns false if libmatio doesn't support MAT73
