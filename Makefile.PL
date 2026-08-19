@@ -84,6 +84,7 @@ my %more_items = (
     },
     TEST_REQUIRES => {
         'Test::More' => '0.88', # done_testing
+        'Test::PDL' => '0.21',
     },
     PREREQ_PM => {
         'PDL' => '2.043',
