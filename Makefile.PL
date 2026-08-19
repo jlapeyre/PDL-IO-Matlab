@@ -11,6 +11,13 @@ use Devel::CheckLib qw(check_lib);
 
 my ($matio_top_level, $inc, $libs, %object) = ('./matio-1.5.30', '', '');
 
+sub pkg_run {
+  my ($pkg, $flag) = @_;
+  return unless my $out = `pkg-config $pkg $flag`;
+  chomp $out;
+  $out;
+}
+
 if (check_lib(lib => 'hdf5')) {
   $libs .= ' -lhdf5';
   $inc .= ' -DHAVE_HDF5=1';
@@ -19,14 +26,14 @@ if (check_lib(lib => 'hdf5')) {
   my $this_inc = (
     eval {require PkgConfig; join ' ', PkgConfig->find('hdf5')->get_cflags} ||
     eval {require ExtUtils::PkgConfig; ExtUtils::PkgConfig->cflags('hdf5')} ||
-    `pkg-config hdf5 --cflags` ||
+    pkg_run(qw(hdf5 --cflags)) ||
     ''
   );
   $inc .= ' '.$this_inc.' -DHAVE_HDF5=1' if $this_inc;
   $libs .= ' '.(
     eval {require PkgConfig; join ' ', PkgConfig->find('hdf5')->get_ldflags} ||
     eval {require ExtUtils::PkgConfig; ExtUtils::PkgConfig->libs('hdf5')} ||
-    `pkg-config hdf5 --libs` ||
+    pkg_run(qw(hdf5 --libs)) ||
     '-lhdf5'
   );
   print "Not found HDF5; got inc=($inc) libs=($libs)\n";
@@ -39,7 +46,7 @@ if (check_lib(lib => 'matio')) {
   my $this_inc = (
     eval {require PkgConfig; join ' ', PkgConfig->find('matio')->get_cflags} ||
     eval {require ExtUtils::PkgConfig; ExtUtils::PkgConfig->cflags('matio')} ||
-    `pkg-config matio --cflags` ||
+    pkg_run(qw(matio --cflags)) ||
     ''
   )
 ) {
@@ -47,7 +54,7 @@ if (check_lib(lib => 'matio')) {
   $libs .= ' '.(
     eval {require PkgConfig; join ' ', PkgConfig->find('matio')->get_ldflags} ||
     eval {require ExtUtils::PkgConfig; ExtUtils::PkgConfig->libs('matio')} ||
-    `pkg-config matio --libs` ||
+    pkg_run(qw(matio --libs)) ||
     '-lmatio'
   );
   print "Found matio with pkg; got inc=($inc) libs=($libs)\n";
