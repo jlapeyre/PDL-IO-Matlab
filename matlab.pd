@@ -806,7 +806,7 @@ _have_hdf5()
 ');
 
 
-pp_addxs ( '', "
+pp_addxs (<<EOF
 
 mat_t *
 _mat_create_ver( matname, hdr_str, mat_file_ver_in, header_flag)
@@ -841,8 +841,8 @@ _mat_create_ver( matname, hdr_str, mat_file_ver_in, header_flag)
  else RETVAL = Mat_CreateVer(matname, (void *) NULL, mat_file_ver);
  OUTPUT:
  RETVAL
-
-");
+EOF
+);
 
 pp_addxs ( '',  "
 
