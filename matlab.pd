@@ -795,7 +795,7 @@ _mat_close( handle )
 int
 _have_hdf5()
   CODE:
-#if defined(HAVE_HDF5) && HAVE_HDF5
+#if defined(HAVE_HDF5) && HAVE_HDF5 && defined(MAT73) && MAT73
   RETVAL = 1;
 #else
   RETVAL = 0;
