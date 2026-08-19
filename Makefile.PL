@@ -14,7 +14,9 @@ my ($matio_top_level, $inc, $libs, %object) = ('./matio-1.5.0', '', '');
 if (check_lib(lib => 'hdf5')) {
   $libs .= ' -lhdf5';
   $inc .= ' -DHAVE_HDF5=1';
+  print "Found HDF5\n";
 } else {
+  print "Not found HDF5\n";
   my $this_inc = (
     eval {require PkgConfig; join ' ', PkgConfig->find('hdf5')->get_cflags} ||
     eval {require ExtUtils::PkgConfig; ExtUtils::PkgConfig->cflags('hdf5')} ||
@@ -32,7 +34,9 @@ if (check_lib(lib => 'hdf5')) {
 
 if (check_lib(lib => 'matio')) {
   $libs .= ' -lmatio';
+  print "Found matio\n";
 } else {
+  print "Not found matio\n";
   %object = (OBJECT  =>  ' Matlab$(OBJ_EXT) matio_obj$(OBJ_EXT) ');
   if ( not -e "$matio_top_level/src/matio_pubconf.h" ) {
     print "Makefile.PL: running configure in $matio_top_level\n";
@@ -96,13 +100,9 @@ $hash{META_MERGE} = {
 
 WriteMakefile( %hash );
 
-
-if(exists $ARGV[0] && $ARGV[0] eq 'README.pod')
-{
+if (exists $ARGV[0] && $ARGV[0] eq 'README.pod') {
   print STDERR "Writing README.pod\n";
-  open README, '>README.pod'  or die "Couldn't open README.pod";
-#  print README $POD_header;
-
+  open README, '>', 'README.pod'  or die "Couldn't open README.pod";
   foreach my $mod  ('Matlab.pm') {
       open MOD, $mod or die "Couldn't open main module";
       while (<MOD>)
