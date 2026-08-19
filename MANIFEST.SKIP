@@ -35,6 +35,12 @@ Matlab\.bs$
 ^matio-.*/src/stamp-h2$
 ^matio-.*/test/atconfig$
 ^matio-.*/src/\.libs
+^matio-.*/snprintf/\.libs
+^matio-.*/test/\.libs
+^matio-.*/test/test_mat
+^matio-.*/test/test_snprintf
+^matio-.*/tools/\.libs
+^matio-.*/tools/matdump
 
 ^MANIFEST\.SKIP$
 

@@ -9,7 +9,7 @@ use Devel::CheckLib qw(check_lib);
 # These do clean and distclean in both module distribution
 # toplevel and in $matio_top_level.
 
-my ($matio_top_level, $inc, $libs, %object) = ('./matio-1.5.0', '', '');
+my ($matio_top_level, $inc, $libs, %object) = ('./matio-1.5.30', '', '');
 
 if (check_lib(lib => 'hdf5')) {
   $libs .= ' -lhdf5';
@@ -76,7 +76,7 @@ $hash{LIBS}[0] .= $libs;
 sub MY::postamble {   qq{
 
 matio_obj\$(OBJ_EXT):
-	cd $matio_top_level; cd src; \$(MAKE)
+	cd $matio_top_level; \$(MAKE)
 	ld -r -o matio_obj\$(OBJ_EXT) $matio_top_level/src/.libs/*\$(OBJ_EXT)
 
 cleanall: clean

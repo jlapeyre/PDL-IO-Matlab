@@ -5,7 +5,7 @@ use warnings;
 our $VERSION = '0.006';
 pp_setversion("'$VERSION'");
 
-my $Matio_src = 'matio-1.5.0/src';
+my $Matio_src = 'matio-1.5.30/src';
 
 # This works nicely, but I am not using it for anything
 my ($MAT_FT_MAT73,$MAT_FT_MAT5,$MAT_FT_MAT4) = (0,1,2);
