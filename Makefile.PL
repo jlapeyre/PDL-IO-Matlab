@@ -35,6 +35,22 @@ if (check_lib(lib => 'hdf5')) {
 if (check_lib(lib => 'matio')) {
   $libs .= ' -lmatio';
   print "Found matio\n";
+} elsif (
+  my $this_inc = (
+    eval {require PkgConfig; join ' ', PkgConfig->find('matio')->get_cflags} ||
+    eval {require ExtUtils::PkgConfig; ExtUtils::PkgConfig->cflags('matio')} ||
+    `pkg-config matio --cflags` ||
+    ''
+  )
+) {
+  $inc .= ' '.$this_inc;
+  $libs .= ' '.(
+    eval {require PkgConfig; join ' ', PkgConfig->find('matio')->get_ldflags} ||
+    eval {require ExtUtils::PkgConfig; ExtUtils::PkgConfig->libs('matio')} ||
+    `pkg-config matio --libs` ||
+    '-lmatio'
+  );
+  print "Found matio with pkg; got inc=($inc) libs=($libs)\n";
 } else {
   $inc .= " -DDISTRO_MATIO";
   $libs .= ' -lmatio';
