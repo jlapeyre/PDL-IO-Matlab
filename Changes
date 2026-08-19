@@ -1,4 +1,5 @@
 - update to libmatio-1.5.30
+- exception if try to create MAT73 file but available libmatio doesn't support
 
 0.006 2021-05-01
 - add Mat_GetHeader to distributed version of matio (is in upstream as of 2019)

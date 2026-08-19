@@ -819,11 +819,13 @@ _mat_create_ver( matname, hdr_str, mat_file_ver_in, header_flag)
  enum mat_ft mat_file_ver;
  switch (mat_file_ver_in)
     {
+#if defined(MAT73) && MAT73
      case $MAT_FT_MAT73:
               {
                 mat_file_ver = MAT_FT_MAT73;
                 break;
               }
+#endif
      case $MAT_FT_MAT5:
               {
                 mat_file_ver = MAT_FT_MAT5;
@@ -831,10 +833,10 @@ _mat_create_ver( matname, hdr_str, mat_file_ver_in, header_flag)
               }
      case $MAT_FT_MAT4:
               {
-               barf(\"PDL::IO::Matlab::open Writing in format version MAT4 not supported.\");
+               barf("PDL::IO::Matlab::open Writing in format version MAT4 not supported.");
               }
      default:
-          barf(\"PDL::IO::Matlab::open unknown file format.\");
+          barf("PDL::IO::Matlab::open unknown file format.");
     }
  if (header_flag)
      RETVAL = Mat_CreateVer(matname, hdr_str, mat_file_ver);
