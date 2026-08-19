@@ -22,10 +22,10 @@ this module.
  # write two pdls in matlab 5 format
  matlab_write('file.dat', $x, $y);
 
- # read an array of ndarrays 
+ # read an array of ndarrays
  # from file in matlab 4, 5, or 7.3 format.
  my @pdls =  matlab_read('file.dat');
- 
+
  # write pdl in matlab 7.3 format.
  matlab_write('file.dat', 'MAT73', $x);
 
@@ -118,7 +118,7 @@ including the name, dimension and class type of the variables.
  $mat = PDL::IO::Matlab->new('file.dat', '>', { header => 'some text'} );
 
  # read-write  with rw or <>
- $mat = PDL::IO::Matlab->new('file.dat', 'rw');  
+ $mat = PDL::IO::Matlab->new('file.dat', 'rw');
 
  # open for reading
  $mat = PDL::IO::Matlab->new('file.dat', '<');
@@ -357,7 +357,7 @@ by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
 
-The matio library included here is 
+The matio library included here is
 Copyright 2011 Christopher C. Hulbert. All rights reserved.
 See the file matio-1.5/COPYING in the source distribution
 of this module.

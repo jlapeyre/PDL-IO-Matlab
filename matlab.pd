@@ -62,10 +62,10 @@ this module.
  # write two pdls in matlab 5 format
  matlab_write('file.dat', $x, $y);
 
- # read an array of ndarrays 
+ # read an array of ndarrays
  # from file in matlab 4, 5, or 7.3 format.
  my @pdls =  matlab_read('file.dat');
- 
+
  # write pdl in matlab 7.3 format.
  matlab_write('file.dat', 'MAT73', $x);
 
@@ -182,7 +182,7 @@ sub matlab_write {
             push @strings, $v;
         }
     }
-    barf 'matlab_write: ' . scalar(@strings) . 
+    barf 'matlab_write: ' . scalar(@strings) .
         ' string arguments given. One or two expected.'
         if @strings < 1 or @strings > 2 ;
     my $filename = $strings[0];
@@ -237,7 +237,7 @@ sub matlab_print_info {
  $mat = PDL::IO::Matlab->new('file.dat', '>', { header => 'some text'} );
 
  # read-write  with rw or <>
- $mat = PDL::IO::Matlab->new('file.dat', 'rw');  
+ $mat = PDL::IO::Matlab->new('file.dat', 'rw');
 
  # open for reading
  $mat = PDL::IO::Matlab->new('file.dat', '<');
@@ -297,8 +297,8 @@ sub new {
 
     my $obj = $opt->options($iopts);
 
-    my %exobj = ( 
-        filename => undef, 
+    my %exobj = (
+        filename => undef,
         mode => undef,
         handle => undef,
         wvarnum => 0,
@@ -540,7 +540,7 @@ C<$mat>.
 
 sub get_header {
     my $self = shift;
-    return defined $self->{header} ? 
+    return defined $self->{header} ?
         $self->{header} : defined $self->{handle} ?
         _mat_get_header($self->{handle}) : undef;
 }
@@ -611,7 +611,7 @@ sub write_accessors {
     my @accessors;
     my $errs;
     foreach (@funcs) {
-        $errs = s/!e// ? 
+        $errs = s/!e// ?
      "\n       barf 'PDL::IO::Matlab::get_$_: $_ not defined.' unless
           defined \$self->{$_};" : '';
     my $getter = "get_$_";
@@ -623,7 +623,7 @@ sub write_accessors {
         my \$self = shift;$errs
             \$self->{$_};
     }
-  
+
     sub $setter {
        my \$self = shift;
        \$self->{$_} = shift;
@@ -722,7 +722,7 @@ by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
 
-The matio library included here is 
+The matio library included here is
 Copyright 2011 Christopher C. Hulbert. All rights reserved.
 See the file matio-1.5/COPYING in the source distribution
 of this module.
