@@ -34,6 +34,14 @@ jobs:
         uses: PDLPorters/devops/github-actions/install-dep-pdl-dep@master
       - name: Install HDF5
         uses: PDLPorters/devops/github-actions/install-dep-hdf5@master
+      - name: Install libmatio (via apt-get)
+        shell: bash
+        if: runner.os == 'Linux'
+        run: sudo apt-get -y update && sudo apt-get install --no-install-recommends -y libmatio-dev
+      - name: Install HDF5 (via brew)
+        shell: bash
+        if: runner.os == 'macOS'
+        run: brew install libmatio
       - name: 'ci-dist: target-all'
         uses: PDLPorters/devops/github-actions/ci-dist@master
         with:
