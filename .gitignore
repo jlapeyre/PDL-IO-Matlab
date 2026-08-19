@@ -19,7 +19,6 @@ Matlab.pm
 Matlab.c
 Matlab.xs
 Matlab.bs
-*.mat
 
 matio-*/matio.pc
 matio-*/src/matioConfig.h
