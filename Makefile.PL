@@ -16,7 +16,6 @@ if (check_lib(lib => 'hdf5')) {
   $inc .= ' -DHAVE_HDF5=1';
   print "Found HDF5\n";
 } else {
-  print "Not found HDF5\n";
   my $this_inc = (
     eval {require PkgConfig; join ' ', PkgConfig->find('hdf5')->get_cflags} ||
     eval {require ExtUtils::PkgConfig; ExtUtils::PkgConfig->cflags('hdf5')} ||
@@ -30,13 +29,16 @@ if (check_lib(lib => 'hdf5')) {
     `pkg-config hdf5 --libs` ||
     '-lhdf5'
   );
+  print "Not found HDF5; got inc=($inc) libs=($libs)\n";
 }
 
 if (check_lib(lib => 'matio')) {
   $libs .= ' -lmatio';
   print "Found matio\n";
 } else {
-  print "Not found matio\n";
+  $inc .= " -DDISTRO_MATIO";
+  $libs .= ' -lmatio';
+  print "Not found matio; got inc=($inc) libs=($libs)\n";
   %object = (OBJECT  =>  ' Matlab$(OBJ_EXT) matio_obj$(OBJ_EXT) ');
   if ( not -e "$matio_top_level/src/matio_pubconf.h" ) {
     print "Makefile.PL: running configure in $matio_top_level\n";
