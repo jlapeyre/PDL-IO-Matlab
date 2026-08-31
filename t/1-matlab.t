@@ -6,9 +6,9 @@ use Test::PDL;
 use PDL;
 use PDL::IO::Matlab qw ( matlab_read matlab_write );
 
-# allows any 1.5.*
+# allows any 1.{5,6}.*
 my @got_v = PDL::IO::Matlab::get_library_version;
-is_deeply [@got_v[0..1]], [1,5], 'library version' or diag explain \@got_v;
+ok($got_v[0] == 1 && $got_v[1] >= 5, 'library version') or diag explain \@got_v;
 
 # Write one pdl
 my $f = 'testf.mat';
