@@ -1,3 +1,6 @@
+0.008 2026-08-31
+- fix test failure if 1.6+ (#4) - thanks @sebastic
+
 0.007 2026-08-19
 - update to libmatio-1.5.30
 - exception if try to create MAT73 file but available libmatio doesn't support
